@@ -17,6 +17,7 @@ IMPLEMENT_DYNAMIC(CKamacSheet, CPropertySheet)
 CKamacSheet::CKamacSheet(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 {
+	Init();
 	AddPages();
 }
 
@@ -25,9 +26,16 @@ CKamacSheet::CKamacSheet(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 CKamacSheet::CKamacSheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 {
+	Init();
 	AddPages();
 }
 
+
+void CKamacSheet::Init(void)
+{
+	GetIniFileName();
+	LoadConfig();
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::AddPages(void)
@@ -155,8 +163,8 @@ ULONG32 CKamacSheet::CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs)
 
 	int sxc, syc;
 	double d1, d2;
-	d1 = double(koOptions.ulMonitorSize * koOptions.ulMonitorSize);
-	d2 = 1.0 + double(nsw * nsw) / double(nsh * nsh);
+	d1 = double(koOptions.ulMonitorSize) * double(koOptions.ulMonitorSize);
+	d2 = 1.0 + double(nsw) * double(nsw) / (double(nsh) * double(nsh));
 	d1 = d1 / d2;
 	d1 = sqrt(d1);
 	d2 = d1 * double(nsw) / double(nsh);
@@ -164,9 +172,9 @@ ULONG32 CKamacSheet::CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs)
 	sxc = int(d2 + 0.5);
 	if (bAbs)
 	{
-		d1 = xc - lLastX;
+		d1 = double(xc - lLastX);
 		lLastX = xc;
-		d2 = yc - lLastY;
+		d2 = double(yc - lLastY);
 		lLastY = yc;
 	}
 	else
@@ -195,9 +203,7 @@ BOOL CKamacSheet::OnInitDialog()
 	tniTray.Create(this, 1, _T("Kamac"), m_hIcon, WM_TRAYICONNOTIFY);
 	tniTray.HideIcon();
 
-	GetIniFileName();
 	ppOptions->strExeFileName = strExeFileName;
-	LoadConfig();
 	if (!CheckToday())
 		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
 
@@ -315,7 +321,7 @@ void CKamacSheet::GetOptions(CKamacOptions& ko)
 	const TCHAR* SecName = _T("Options");
 	ko.bStartWithOS = (BOOL)(siConfig.GetULongValue(SecName, _T("StartWithOS"), 0));
 	ko.bMonitorSizeConfirmed = (BOOL)(siConfig.GetULongValue(SecName, _T("MonitorSizeConfirmed"), 0));
-	ko.ulMonitorSize = siConfig.GetULongValue(SecName, _T("MonitorSize"), 35560);
+	ko.ulMonitorSize = siConfig.GetULongValue(SecName, _T("MonitorSize"), 3556);
 }
 
 

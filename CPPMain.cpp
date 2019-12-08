@@ -82,8 +82,8 @@ BOOL CPPMain::OnInitDialog()
 	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
 	strScreenSize.Format(_T("Screen size:\t%u mm\r\n"), (koOptions.ulMonitorSize + 5) / 10); 
 	strResolution.Format( _T("Resolution:\t%d x %d\r\n"), nsw, nsh);
-	strKeyboard = _T("Last key:\t\t\r\n");
-	strMouse = _T("Mouse pointer:\t");
+	strKeyboard.Format(_T("Last key:\t\t0x%02X\r\n"), 0);
+	UpdateMousePos();
 	strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
 
 	statInfo.SetContent(strInfo);
@@ -104,8 +104,11 @@ BOOL CPPMain::OnInitDialog()
 //----------------------------------------------------------------------------------------------------------------------
 void CPPMain::UpdateInfo(void)
 {
+	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
+	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
+	strScreenSize.Format(_T("Screen size:\t%u mm\r\n"), (koOptions.ulMonitorSize + 5) / 10);
+	strResolution.Format(_T("Resolution:\t%d x %d\r\n"), nsw, nsh);
 	strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
-	//statInfo.SetWindowText(strInfo);
 	statInfo.SetContent(strInfo);
 }
 

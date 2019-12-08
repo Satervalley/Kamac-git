@@ -39,6 +39,7 @@ protected:
 	CTrayNotifyIcon tniTray;
 	LONG lLastX{ 0 }, lLastY{ 0 };
 
+	void Init(void);
 	void AddPages(void);
 	void ProcessKeyboardInput(RAWKEYBOARD & rk);
 	void ProcessMouseInput(RAWMOUSE & rm);
