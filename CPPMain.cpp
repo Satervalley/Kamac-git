@@ -18,8 +18,8 @@ IMPLEMENT_DYNAMIC(CPPMain, CPropertyPage)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-CPPMain::CPPMain()
-	: CPropertyPage(IDD_CPPMain)
+CPPMain::CPPMain(CKamacOptions& ko)
+	: CPropertyPage(IDD_CPPMain), koOptions(ko)
 {
 	
 }
@@ -80,11 +80,11 @@ BOOL CPPMain::OnInitDialog()
 //	::SetWindowLongPtr(statInfo, GWL_EXSTYLE, statInfo.GetExStyle() | WS_EX_COMPOSITED);
 	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
 	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
-	strScreenSize = _T("Screen size:\t\t\r\n");
+	strScreenSize.Format(_T("Screen size:\t%u mm\r\n"), (koOptions.ulMonitorSize + 5) / 10); 
 	strResolution.Format( _T("Resolution:\t%d x %d\r\n"), nsw, nsh);
 	strKeyboard = _T("Last key:\t\t\r\n");
 	strMouse = _T("Mouse pointer:\t");
-	strInfo.Format(_T("%s%s%s%s"), strScreenSize, strResolution, strKeyboard, strMouse);
+	strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
 
 	statInfo.SetContent(strInfo);
 	//	statInfo.SetWindowText(strInfo);
@@ -104,7 +104,7 @@ BOOL CPPMain::OnInitDialog()
 //----------------------------------------------------------------------------------------------------------------------
 void CPPMain::UpdateInfo(void)
 {
-	strInfo.Format(_T("%s%s%s%s"), strScreenSize, strResolution, strKeyboard, strMouse);
+	strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
 	//statInfo.SetWindowText(strInfo);
 	statInfo.SetContent(strInfo);
 }
@@ -160,6 +160,43 @@ void CPPMain::UpdateMouseMiddleClick(ULONG32 ulLCSession, ULONG32 ulLCToday, ULO
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG64 ulMDTotal)
+{
+	ulMDSession /= 100ull;	// to cm
+	ulMDToday /= 100ull;
+	ulMDTotal /= 100ull;
+	CString str;
+	if (ulMDSession < 100ull)
+	{
+		str.Format(_T("%llu cm"), ulMDSession);
+	}
+	else
+	{
+		str.Format(_T("%llu.%llu m"), ulMDSession / 100ull, ulMDSession % 100ull);
+	}
+	lcMain.SetItemText(6, 4, str);
+	if (ulMDToday < 100ll)
+	{
+		str.Format(_T("%llu cm"), ulMDToday);
+	}
+	else
+	{
+		str.Format(_T("%llu.%llu m"), ulMDToday / 100ull, ulMDToday % 100ull);
+	}
+	lcMain.SetItemText(6, 3, str);
+	if (ulMDTotal < 100ll)
+	{
+		str.Format(_T("%llu cm"), ulMDTotal);
+	}
+	else
+	{
+		str.Format(_T("%llu.%llu m"), ulMDTotal / 100ull, ulMDTotal % 100ull);
+	}
+	lcMain.SetItemText(6, 2, str);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void CPPMain::UpdateKeyboard(ULONG32 ulKSSession, ULONG32 ulKSToday, ULONG32 ulKSTotal, USHORT usCode)
 {
 	CString str;
@@ -169,7 +206,7 @@ void CPPMain::UpdateKeyboard(ULONG32 ulKSSession, ULONG32 ulKSToday, ULONG32 ulK
 	lcMain.SetItemText(1, 3, str);
 	str.Format(_T("%u"), ulKSSession);
 	lcMain.SetItemText(1, 4, str);
-	strKeyboard.Format(_T("Last key:\t\t%X\r\n"), usCode);
+	strKeyboard.Format(_T("Last key:\t\t0x%02X\r\n"), usCode);
 }
 
 
@@ -180,5 +217,6 @@ void CPPMain::UpdateAll(const CKMData& kmdSession, const CKMData& kmdToday, cons
 	UpdateMouseLeftClick(kmdSession.ulLeftClick, kmdToday.ulLeftClick, kmdTotal.ulLeftClick);
 	UpdateMouseMiddleClick(kmdSession.ulMiddleClick, kmdToday.ulMiddleClick, kmdTotal.ulMiddleClick);
 	UpdateMouseRightClick(kmdSession.ulRightClick, kmdToday.ulRightClick, kmdTotal.ulRightClick);
+	UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
 }
 

@@ -13,7 +13,7 @@ public:
 	ULONG32 ulRightClick{ 0 };
 	ULONG32 ulMiddleClick{ 0 };
 
-	ULONG64 ullDistance{ 0 };	// as 1% mm
+	ULONG64 ullDistance{ 0 };	// as 1/10 mm
 
 	void Reset(void)
 	{

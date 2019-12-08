@@ -79,6 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -95,6 +96,12 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Message>$(SolutionDir)AutoVersion\AfterBuild "$(ProjectDir)\$(ProjectName)_av"</Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)AutoVersion\BeforeBuild "$(ProjectDir)\$(ProjectName)_av" "$(ProjectDir)\$(ProjectName)_av"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -125,6 +132,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)AutoVersion\BeforeBuild "$(ProjectDir)\$(ProjectName)_av" "$(ProjectDir)\$(ProjectName)_av"</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)\AutoVersion\AfterBuild "$(ProjectDir)\$(ProjectName)_av"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -181,6 +194,7 @@
     <ResourceCompile Include="Kamac.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\Kamac.bmp" />
     <Image Include="res\Kamac.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

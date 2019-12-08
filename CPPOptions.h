@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "CKamacOptions.h"
 
 // CPPOptions 对话框
 
@@ -8,7 +9,7 @@ class CPPOptions : public CPropertyPage
 	DECLARE_DYNAMIC(CPPOptions)
 
 public:
-	CPPOptions();
+	CPPOptions(CKamacOptions & ko);
 	virtual ~CPPOptions();
 
 // 对话框数据
@@ -24,4 +25,11 @@ public:
 	afx_msg void OnClickedCheckStartWithOS();
 	BOOL bStartWithOS;
 	CString strExeFileName;
+	CKamacOptions & koOPtions;
+
+	//virtual BOOL OnKillActive();
+	virtual BOOL OnSetActive();
+	afx_msg void OnKillFocusEditMonitorSize();
+protected:
+	ULONG32 ulMonitorSize;
 };

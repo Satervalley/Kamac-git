@@ -5,6 +5,7 @@
 #include "Kamac.h"
 #include "CPPAbout.h"
 #include "afxdialogex.h"
+#include "Kamac_av.h"
 
 
 // CPPAbout 对话框
@@ -47,7 +48,11 @@ BOOL CPPAbout::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	htmlContent.ModifyStyleEx(WS_EX_TRANSPARENT, 0);
-	htmlContent.SetWindowText(htmlStr);
+	CString str, strVer;
+	strVer.Format(_T("Version %d.%d Build %d.%d on %d.%d.%d"), AutoVersion::nMajor, AutoVersion::nMinor,
+		AutoVersion::nBuild, AutoVersion::nRevision, AutoVersion::nYear, AutoVersion::nMonth, AutoVersion::nDay);
+	str.Format(htmlStr, strVer, AutoVersion::nYear);
+	htmlContent.SetWindowText(str);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE

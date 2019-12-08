@@ -11,6 +11,7 @@
 #define IDD_CPPMain                     132
 #define IDD_CPPOptions                  134
 #define IDD_CPPAbout                    135
+#define IDB_BITMAP1                     138
 #define IDC_TAB_MAIN                    1000
 #define IDC_LIST1                       1001
 #define IDC_CHECK1                      1002
@@ -21,14 +22,15 @@
 #define IDC_EDIT_INFO                   1006
 #define IDC_EDIT_MONITORSIZE            1006
 #define IDC_STATIC_CONTENT              1007
+#define IDC_STATIC2                     1008
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        138
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1008
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

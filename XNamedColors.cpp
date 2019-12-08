@@ -536,7 +536,7 @@ void CXNamedColors::Dump(LPCTSTR lpszFile)
 					SetRGB(m_aColorNames[j].color);
 				}
 				GetHex(szBuf, 99);
-				TCHAR *text = _T("black");
+				const TCHAR *text = _T("black");
 				if (_tcscmp(szBuf, _T("#000000")) == 0)
 					text = _T("white");
 				_ftprintf(f, 

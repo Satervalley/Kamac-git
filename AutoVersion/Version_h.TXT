@@ -1,0 +1,20 @@
+#pragma once
+
+namespace AutoVersion
+{
+	static const int nYear = 2008;
+	static const int nMonth = 03;
+	static const int nDay = 13;
+	static const int nMajor = 1;
+	static const int nMinor = 67;
+	static const int nBuild = 2223;
+	static const int nRevision = 12158;
+}
+
+
+
+Pre-build command line:
+$(SolutionDir)\BeforeBuild "$(ProjectDir)\$(ProjectName)_av" "$(ProjectDir)\$(ProjectName)_av"
+
+Post-build command line:
+$(SolutionDir)\AfterBuild "$(ProjectDir)\$(ProjectName)_av"

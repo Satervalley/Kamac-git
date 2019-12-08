@@ -134,12 +134,54 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 		kmdTotal.IncMiddleClick();
 		ppMain->UpdateMouseMiddleClick(kmdSession.ulMiddleClick, kmdToday.ulMiddleClick, kmdTotal.ulMiddleClick);
 	}
+	USHORT f = 0x0001;
+	BOOL bAbs = rm.usFlags & f;
+	ULONG32 ulmd = CaculateMoveDistance(rm.lLastX, rm.lLastY, bAbs);
+	kmdSession.IncDistance(ulmd);
+	kmdToday.IncDistance(ulmd);
+	kmdTotal.IncDistance(ulmd);
+	ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
+
 	ppMain->UpdateMousePos();
 	ppMain->UpdateInfo();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
+ULONG32 CKamacSheet::CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs)
+{
+	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
+	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
+
+	int sxc, syc;
+	double d1, d2;
+	d1 = double(koOptions.ulMonitorSize * koOptions.ulMonitorSize);
+	d2 = 1.0 + double(nsw * nsw) / double(nsh * nsh);
+	d1 = d1 / d2;
+	d1 = sqrt(d1);
+	d2 = d1 * double(nsw) / double(nsh);
+	syc = int(d1 + 0.5);
+	sxc = int(d2 + 0.5);
+	if (bAbs)
+	{
+		d1 = xc - lLastX;
+		lLastX = xc;
+		d2 = yc - lLastY;
+		lLastY = yc;
+	}
+	else
+	{
+		lLastX += xc;
+		lLastY += yc;
+		d1 = xc;
+		d2 = yc;
+	}
+	d1 = sxc * d1 / double(nsw);
+	d2 = syc * d2 / double(nsh);
+	return ULONG32(sqrt(d1 * d1 + d2 * d2) + 0.5);
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 BOOL CKamacSheet::OnInitDialog()
 {
@@ -158,6 +200,25 @@ BOOL CKamacSheet::OnInitDialog()
 	LoadConfig();
 	if (!CheckToday())
 		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
+
+	CPoint pt;
+	::GetCursorPos(&pt);
+	lLastX = pt.x;
+	lLastY = pt.y;
+
+	RAWINPUTDEVICE rid[2];
+	rid[0].usUsagePage = 1;
+	rid[0].usUsage = 2;
+	rid[0].dwFlags = RIDEV_INPUTSINK;
+	rid[0].hwndTarget = *this;
+
+	rid[1].usUsagePage = 1;
+	rid[1].usUsage = 6;
+	rid[1].dwFlags = RIDEV_INPUTSINK;
+	rid[1].hwndTarget = *this;
+	::RegisterRawInputDevices(rid, 2, sizeof(rid[0]));
+
+
 	uTimerID = SetTimer(uTimerID, 1000, nullptr);
 
 	return bResult;

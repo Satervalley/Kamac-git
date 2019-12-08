@@ -24,8 +24,8 @@ public:
 protected:
 
 	HICON m_hIcon;
-	CPPMain* ppMain{ new CPPMain() };
-	CPPOptions* ppOptions{ new CPPOptions() };
+	CPPMain* ppMain{ new CPPMain(koOptions) };
+	CPPOptions* ppOptions{ new CPPOptions(koOptions) };
 	CPPAbout* ppAbout{ new CPPAbout() };
 	CKMData kmdTotal, kmdToday, kmdSession;
 	CKamacOptions koOptions;
@@ -37,6 +37,7 @@ protected:
 	ULONG64 ullToday = 0;
 	SYSTEMTIME stToday;
 	CTrayNotifyIcon tniTray;
+	LONG lLastX{ 0 }, lLastY{ 0 };
 
 	void AddPages(void);
 	void ProcessKeyboardInput(RAWKEYBOARD & rk);
@@ -51,6 +52,7 @@ protected:
 	BOOL CheckToday(void);
 	void SystemtimeToULL(const SYSTEMTIME& st, ULONG64 & ull);
 	void ULLToSystemtime(const ULONG64& ull, SYSTEMTIME& st);
+	ULONG32 CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs = FALSE);
 protected:
 	DECLARE_MESSAGE_MAP()
 public:

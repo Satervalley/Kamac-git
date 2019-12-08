@@ -72,24 +72,10 @@ BOOL CKamacApp::InitInstance()
 	ppsSheet->Create(nullptr, WS_SYSMENU | WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE | WS_MINIMIZEBOX, 
 		0);
 
-	RAWINPUTDEVICE rid[2];
-	rid[0].usUsagePage = 1;
-	rid[0].usUsage = 2;
-	rid[0].dwFlags = RIDEV_INPUTSINK;
-	rid[0].hwndTarget = *ppsSheet;
-
-	rid[1].usUsagePage = 1;
-	rid[1].usUsage = 6;
-	rid[1].dwFlags = RIDEV_INPUTSINK;
-	rid[1].hwndTarget = *ppsSheet;
-
-
 	m_pMainWnd = ppsSheet;
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
 	
-	::RegisterRawInputDevices(rid, 2, sizeof(rid[0]));
-
 	//CKamacDlg dlg;
 	//m_pMainWnd = &dlg;
 	//INT_PTR nResponse = dlg.DoModal();
