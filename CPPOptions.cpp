@@ -6,6 +6,7 @@
 #include "CPPOptions.h"
 #include "afxdialogex.h"
 
+UINT WM_OPTIONS_CHANGED = WM_USER + 2;
 
 // CPPOptions 对话框
 
@@ -83,4 +84,5 @@ void CPPOptions::OnKillFocusEditMonitorSize()
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
 	koOPtions.ulMonitorSize = ulMonitorSize;
+	GetParent()->SendMessage(WM_OPTIONS_CHANGED);
 }

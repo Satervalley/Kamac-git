@@ -9,6 +9,45 @@
 #include "SimpleIni.h"
 #include "NTRAY.H"
 
+
+class CDisplayMan
+{
+public:
+	void Update(ULONG32 ulms)
+	{
+		ulWidth = ::GetSystemMetrics(SM_CXSCREEN);
+		ulHeight = ::GetSystemMetrics(SM_CYSCREEN);
+		ulMonitorSize = ulms;
+		double d1, d2;
+		d1 = (double)ulMonitorSize * (double)ulMonitorSize;
+		d2 = 1.0 + double(ulWidth) * double(ulWidth) / (double(ulHeight) * double(ulHeight));
+		d1 = d1 / d2;
+		d1 = sqrt(d1);
+		dHeight = d1;
+		dWidth = d1 * double(ulWidth) / double(ulHeight);
+	}
+
+	void Update(int cx, int cy, ULONG32 ulms)
+	{
+		ulWidth = cx;
+		ulHeight = cy;
+		Update(ulms);
+	}
+
+	ULONG32 GetDistance(int cx, int cy)
+	{
+		double d1, d2;
+		d1 = double(cx) * dWidth / (double)ulWidth;
+		d2 = (double)cy * dHeight / double(ulHeight);
+		return ULONG32(sqrt(d1 * d1 + d2 * d2) + 0.5);
+	}
+protected:
+	ULONG32 ulMonitorSize{ 3556 };
+	ULONG32 ulWidth, ulHeight;
+	double dWidth, dHeight;
+};
+
+
 // CKamacSheet
 
 class CKamacSheet : public CPropertySheet
@@ -38,6 +77,7 @@ protected:
 	SYSTEMTIME stToday;
 	CTrayNotifyIcon tniTray;
 	LONG lLastX{ 0 }, lLastY{ 0 };
+	CDisplayMan dmDisplay;
 
 	void Init(void);
 	void AddPages(void);
@@ -62,7 +102,10 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HRESULT OnTrayIconNotify(WPARAM wParam, LPARAM lParam);
+	afx_msg HRESULT OnOptionsChanged(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen);
+	
 };
 
 

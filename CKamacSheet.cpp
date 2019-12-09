@@ -8,6 +8,7 @@
 
 
 UINT WM_TRAYICONNOTIFY = WM_USER + 1;
+extern UINT WM_OPTIONS_CHANGED;
 // CKamacSheet
 
 IMPLEMENT_DYNAMIC(CKamacSheet, CPropertySheet)
@@ -35,6 +36,7 @@ void CKamacSheet::Init(void)
 {
 	GetIniFileName();
 	LoadConfig();
+	dmDisplay.Update(koOptions.ulMonitorSize);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -61,7 +63,9 @@ BEGIN_MESSAGE_MAP(CKamacSheet, CPropertySheet)
 	ON_WM_TIMER()
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_TRAYICONNOTIFY, OnTrayIconNotify)
+	ON_MESSAGE(WM_OPTIONS_CHANGED, OnOptionsChanged)
 	ON_WM_SIZE()
+	ON_WM_DISPLAYCHANGE()
 END_MESSAGE_MAP()
 
 
@@ -158,35 +162,22 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 //----------------------------------------------------------------------------------------------------------------------
 ULONG32 CKamacSheet::CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs)
 {
-	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
-	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
-
-	int sxc, syc;
-	double d1, d2;
-	d1 = double(koOptions.ulMonitorSize) * double(koOptions.ulMonitorSize);
-	d2 = 1.0 + double(nsw) * double(nsw) / (double(nsh) * double(nsh));
-	d1 = d1 / d2;
-	d1 = sqrt(d1);
-	d2 = d1 * double(nsw) / double(nsh);
-	syc = int(d1 + 0.5);
-	sxc = int(d2 + 0.5);
+	int dx, dy;
 	if (bAbs)
 	{
-		d1 = double(xc - lLastX);
+		dx = xc - lLastX;
 		lLastX = xc;
-		d2 = double(yc - lLastY);
+		dy = yc - lLastY;
 		lLastY = yc;
 	}
 	else
 	{
 		lLastX += xc;
 		lLastY += yc;
-		d1 = xc;
-		d2 = yc;
+		dx = xc;
+		dy = yc;
 	}
-	d1 = sxc * d1 / double(nsw);
-	d2 = syc * d2 / double(nsh);
-	return ULONG32(sqrt(d1 * d1 + d2 * d2) + 0.5);
+	return dmDisplay.GetDistance(dx, dy);
 }
 
 
@@ -206,6 +197,13 @@ BOOL CKamacSheet::OnInitDialog()
 	ppOptions->strExeFileName = strExeFileName;
 	if (!CheckToday())
 		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
+
+	if (!koOptions.bMonitorSizeConfirmed)
+	{
+		koOptions.bMonitorSizeConfirmed = TRUE;
+		::AfxMessageBox(_T("You'd better input your monitor size before we start!"), MB_OK | MB_ICONINFORMATION);
+		SetActivePage(1);
+	}
 
 	CPoint pt;
 	::GetCursorPos(&pt);
@@ -419,6 +417,14 @@ HRESULT CKamacSheet::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+HRESULT CKamacSheet::OnOptionsChanged(WPARAM wParam, LPARAM lParam)
+{
+	dmDisplay.Update(koOptions.ulMonitorSize);
+	return 0;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 {
 	CPropertySheet::OnSize(nType, cx, cy);
@@ -430,3 +436,14 @@ void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 		ShowWindow(SW_HIDE);
 	}
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen)
+{
+	CPropertySheet::OnDisplayChange(nImageDepth, cxScreen, cyScreen);
+
+	dmDisplay.Update(cxScreen, cyScreen, koOptions.ulMonitorSize);
+}
+
+

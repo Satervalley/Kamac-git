@@ -175,7 +175,7 @@ void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG6
 	}
 	else
 	{
-		str.Format(_T("%llu.%llu m"), ulMDSession / 100ull, ulMDSession % 100ull);
+		str.Format(_T("%llu.%02llu m"), ulMDSession / 100ull, ulMDSession % 100ull);
 	}
 	lcMain.SetItemText(6, 4, str);
 	if (ulMDToday < 100ll)
@@ -184,7 +184,7 @@ void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG6
 	}
 	else
 	{
-		str.Format(_T("%llu.%llu m"), ulMDToday / 100ull, ulMDToday % 100ull);
+		str.Format(_T("%llu.%02llu m"), ulMDToday / 100ull, ulMDToday % 100ull);
 	}
 	lcMain.SetItemText(6, 3, str);
 	if (ulMDTotal < 100ll)
@@ -193,7 +193,7 @@ void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG6
 	}
 	else
 	{
-		str.Format(_T("%llu.%llu m"), ulMDTotal / 100ull, ulMDTotal % 100ull);
+		str.Format(_T("%llu.%02llu m"), ulMDTotal / 100ull, ulMDTotal % 100ull);
 	}
 	lcMain.SetItemText(6, 2, str);
 }
