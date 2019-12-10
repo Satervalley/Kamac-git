@@ -66,6 +66,10 @@ BEGIN_MESSAGE_MAP(CKamacSheet, CPropertySheet)
 	ON_MESSAGE(WM_OPTIONS_CHANGED, OnOptionsChanged)
 	ON_WM_SIZE()
 	ON_WM_DISPLAYCHANGE()
+	ON_COMMAND(ID_TRAY_MAIN, &CKamacSheet::OnTrayMain)
+	ON_COMMAND(ID_TRAY_OPTIONS, &CKamacSheet::OnTrayOptions)
+	ON_COMMAND(ID_TRAY_ABOUT, &CKamacSheet::OnTrayAbout)
+	ON_COMMAND(ID_TRAY_EXIT, &CKamacSheet::OnTrayExit)
 END_MESSAGE_MAP()
 
 
@@ -391,26 +395,25 @@ HRESULT CKamacSheet::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 		SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0);
 		tniTray.HideIcon();
 	}
-	//if (lParam == WM_RBUTTONUP)
-	//{
-	//	CMenu menu;
+	if (lParam == WM_RBUTTONUP)
+	{
+		CMenu menu;
+		if (menu.LoadMenu(IDR_MENU_TRAY))
+		{
+			CMenu* pm;
+			pm = menu.GetSubMenu(0);
+			if (pm)
+			{
+				CPoint pt;
 
-	//	if (menu.LoadMenu(IDR_MENUTRAYICON))
-	//	{
-	//		CMenu* pm;
-	//		pm = menu.GetSubMenu(0);
-	//		if (pm)
-	//		{
-	//			CPoint pt;
-
-	//			::GetCursorPos(&pt);
-	//			pm->SetDefaultItem(0, TRUE);
-	//			SetForegroundWindow();
-	//			pm->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, this);
-	//		}
-	//		menu.DestroyMenu();
-	//	}
-	//}
+				::GetCursorPos(&pt);
+				//pm->SetDefaultItem(0, TRUE);
+				SetForegroundWindow();
+				pm->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, this);
+			}
+			menu.DestroyMenu();
+		}
+	}
 
 	return 0;
 }
@@ -447,3 +450,43 @@ void CKamacSheet::OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen)
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayMain()
+{
+	// TODO: 在此添加命令处理程序代码
+	SetActivePage(0);
+	ShowWindow(SW_SHOW);
+	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
+	tniTray.HideIcon();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayOptions()
+{
+	// TODO: 在此添加命令处理程序代码
+	SetActivePage(1);
+	ShowWindow(SW_SHOW);
+	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
+	tniTray.HideIcon();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayAbout()
+{
+	// TODO: 在此添加命令处理程序代码
+	SetActivePage(2);
+	ShowWindow(SW_SHOW);
+	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
+	tniTray.HideIcon();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayExit()
+{
+	// TODO: 在此添加命令处理程序代码
+	tniTray.HideIcon();
+	SendMessage(WM_CLOSE);
+}

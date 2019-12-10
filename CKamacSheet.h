@@ -106,6 +106,10 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen);
 	
+	afx_msg void OnTrayMain();
+	afx_msg void OnTrayOptions();
+	afx_msg void OnTrayAbout();
+	afx_msg void OnTrayExit();
 };
 
 
