@@ -78,6 +78,7 @@ protected:
 	CTrayNotifyIcon tniTray;
 	LONG lLastX{ 0 }, lLastY{ 0 };
 	CDisplayMan dmDisplay;
+	CString strTrayTipInfo;
 
 	void Init(void);
 	void AddPages(void);
@@ -94,6 +95,7 @@ protected:
 	void SystemtimeToULL(const SYSTEMTIME& st, ULONG64 & ull);
 	void ULLToSystemtime(const ULONG64& ull, SYSTEMTIME& st);
 	ULONG32 CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs = FALSE);
+	void MakeTrayTipInfo(void);
 protected:
 	DECLARE_MESSAGE_MAP()
 public:

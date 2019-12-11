@@ -118,10 +118,16 @@ void CKamacSheet::ProcessKeyboardInput(RAWKEYBOARD& rk)
 		kmdSession.IncKeyStrokes();
 		kmdToday.IncKeyStrokes();
 		kmdTotal.IncKeyStrokes();
-
-		ppMain->UpdateKeyboard(kmdSession.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdTotal.ulKeyStrokes, rk.MakeCode);
-
-		ppMain->UpdateInfo();
+		if (IsIconic())
+		{
+			int i = 0;
+ 			i++; 
+		}
+		if (!IsIconic())
+		{
+			ppMain->UpdateKeyboard(kmdSession.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdTotal.ulKeyStrokes, rk.MakeCode);
+			ppMain->UpdateInfo();
+		}
 	}
 }
 
@@ -129,26 +135,30 @@ void CKamacSheet::ProcessKeyboardInput(RAWKEYBOARD& rk)
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 {
+	BOOL b = IsIconic();
 	if (rm.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
 	{
 		kmdSession.IncLeftClick();
 		kmdToday.IncLeftClick();
 		kmdTotal.IncLeftClick();
-		ppMain->UpdateMouseLeftClick(kmdSession.ulLeftClick, kmdToday.ulLeftClick, kmdTotal.ulLeftClick);
+		if (!b)
+			ppMain->UpdateMouseLeftClick(kmdSession.ulLeftClick, kmdToday.ulLeftClick, kmdTotal.ulLeftClick);
 	}
 	if (rm.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
 	{
 		kmdSession.IncRightClick();
 		kmdToday.IncRightClick();
 		kmdTotal.IncRightClick();
-		ppMain->UpdateMouseRightClick(kmdSession.ulRightClick, kmdToday.ulRightClick, kmdTotal.ulRightClick);
+		if (!b)
+			ppMain->UpdateMouseRightClick(kmdSession.ulRightClick, kmdToday.ulRightClick, kmdTotal.ulRightClick);
 	}
 	if (rm.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
 	{
 		kmdSession.IncMiddleClick();
 		kmdToday.IncMiddleClick();
 		kmdTotal.IncMiddleClick();
-		ppMain->UpdateMouseMiddleClick(kmdSession.ulMiddleClick, kmdToday.ulMiddleClick, kmdTotal.ulMiddleClick);
+		if (!b)
+			ppMain->UpdateMouseMiddleClick(kmdSession.ulMiddleClick, kmdToday.ulMiddleClick, kmdTotal.ulMiddleClick);
 	}
 	USHORT f = 0x0001;
 	BOOL bAbs = rm.usFlags & f;
@@ -156,10 +166,12 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 	kmdSession.IncDistance(ulmd);
 	kmdToday.IncDistance(ulmd);
 	kmdTotal.IncDistance(ulmd);
-	ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
-
-	ppMain->UpdateMousePos();
-	ppMain->UpdateInfo();
+	if (!b)
+	{
+		ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
+		ppMain->UpdateMousePos();
+		ppMain->UpdateInfo();
+	}
 }
 
 
@@ -414,8 +426,53 @@ HRESULT CKamacSheet::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 			menu.DestroyMenu();
 		}
 	}
-
+	if (lParam == WM_MOUSEMOVE)
+	{
+		MakeTrayTipInfo();
+		tniTray.SetTooltipText(strTrayTipInfo);
+	}
 	return 0;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::MakeTrayTipInfo(void)
+{
+	ULONG64 ulMDSession = kmdSession.ullDistance;
+	ulMDSession /= 100ull;	// to cm
+	ULONG64 ulMDToday = kmdToday.ullDistance;
+	ulMDToday /= 100ull;
+	ULONG64 ulMDTotal = kmdTotal.ullDistance;
+	ulMDTotal /= 100ull;
+	CString strDistSession, strDistToday, strDistTotal;
+	if (ulMDSession < 100ull)
+	{
+		strDistSession.Format(_T("%llucm"), ulMDSession);
+	}
+	else
+	{
+		strDistSession.Format(_T("%llu.%02llum"), ulMDSession / 100ull, ulMDSession % 100ull);
+	}
+	if (ulMDToday < 100ll)
+	{
+		strDistToday.Format(_T("%llucm"), ulMDToday);
+	}
+	else
+	{
+		strDistToday.Format(_T("%llu.%02llum"), ulMDToday / 100ull, ulMDToday % 100ull);
+	}
+	if (ulMDTotal < 100ll)
+	{
+		strDistTotal.Format(_T("%llucm"), ulMDTotal);
+	}
+	else
+	{
+		strDistTotal.Format(_T("%llu.%02llum"), ulMDTotal / 100ull, ulMDTotal % 100ull);
+	}
+	strTrayTipInfo.Format(_T("Kamac\n\nKBD: %u  %u  %u\nMLC: %u  %u  %u\nDIS: %s  %s  %s"), 
+		kmdTotal.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdSession.ulKeyStrokes,
+		kmdTotal.ulLeftClick, kmdToday.ulLeftClick, kmdSession.ulLeftClick,
+		strDistTotal, strDistToday, strDistSession);
 }
 
 
@@ -437,6 +494,14 @@ void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 	{
 		tniTray.ShowIcon();
 		ShowWindow(SW_HIDE);
+	}
+	if (nType == SIZE_RESTORED)
+	{
+		if (::IsWindow(ppMain->m_hWnd))
+		{
+			ppMain->UpdateAll(kmdSession, kmdToday, kmdToday);
+			ppMain->UpdateInfo();
+		}
 	}
 }
 

@@ -39,9 +39,6 @@
     <ClInclude Include="Kamac.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="KamacDlg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="NTRAY.H">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -87,9 +84,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Kamac.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="KamacDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NTRAY.CPP">

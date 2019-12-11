@@ -3,18 +3,13 @@
 // 供 Kamac.rc 使用
 //
 #define IDM_ABOUTBOX                    0x0010
-#define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
-#define IDD_KAMAC_DIALOG                102
 #define IDR_MAINFRAME                   128
-#define IDD_DIALOG_MAIN                 130
 #define IDD_CPPMain                     132
 #define IDD_CPPOptions                  134
 #define IDD_CPPAbout                    135
 #define IDB_BITMAP1                     138
 #define IDR_MENU_TRAY                   139
-#define IDC_TAB_MAIN                    1000
-#define IDC_LIST1                       1001
 #define IDC_CHECK1                      1002
 #define IDC_CHECK_STARTWITHOS           1002
 #define IDC_LIST_MAIN                   1003

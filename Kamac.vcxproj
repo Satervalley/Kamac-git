@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -167,7 +167,6 @@
     <ClInclude Include="CPPOptions.h" />
     <ClInclude Include="INIReader.h" />
     <ClInclude Include="Kamac.h" />
-    <ClInclude Include="KamacDlg.h" />
     <ClInclude Include="NTRAY.H" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Registry.h" />
@@ -185,7 +184,6 @@
     <ClCompile Include="CPPMain.cpp" />
     <ClCompile Include="CPPOptions.cpp" />
     <ClCompile Include="Kamac.cpp" />
-    <ClCompile Include="KamacDlg.cpp" />
     <ClCompile Include="NTRAY.CPP" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Registry.cpp" />
