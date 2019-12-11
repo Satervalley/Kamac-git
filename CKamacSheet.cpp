@@ -499,7 +499,7 @@ void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 	{
 		if (::IsWindow(ppMain->m_hWnd))
 		{
-			ppMain->UpdateAll(kmdSession, kmdToday, kmdToday);
+			ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
 			ppMain->UpdateInfo();
 		}
 	}
