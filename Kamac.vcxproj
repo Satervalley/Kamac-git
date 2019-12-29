@@ -91,11 +91,14 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)itzam\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
+      <AdditionalDependencies>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Message>$(SolutionDir)AutoVersion\AfterBuild "$(ProjectDir)\$(ProjectName)_av"</Message>
@@ -127,12 +130,17 @@
       <ConformanceMode>true</ConformanceMode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)Unqlite\;$(ProjectDir)UnqliteWrapper\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)AutoVersion\BeforeBuild "$(ProjectDir)\$(ProjectName)_av" "$(ProjectDir)\$(ProjectName)_av"</Command>
@@ -158,6 +166,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CHistoryMan.h" />
     <ClInclude Include="CKamacCmdLineInfo.h" />
     <ClInclude Include="CKamacOptions.h" />
     <ClInclude Include="CKamacSheet.h" />
@@ -165,7 +174,11 @@
     <ClInclude Include="CPPAbout.h" />
     <ClInclude Include="CPPMain.h" />
     <ClInclude Include="CPPOptions.h" />
+    <ClInclude Include="HighColorTab.hpp" />
     <ClInclude Include="INIReader.h" />
+    <ClInclude Include="itzamDatabase.h" />
+    <ClInclude Include="itzam\itzam.h" />
+    <ClInclude Include="itzam\itzam_errors.h" />
     <ClInclude Include="Kamac.h" />
     <ClInclude Include="NTRAY.H" />
     <ClInclude Include="pch.h" />
@@ -177,12 +190,17 @@
     <ClInclude Include="XNamedColors.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CHistoryMan.cpp" />
     <ClCompile Include="CKamacCmdLineInfo.cpp" />
     <ClCompile Include="CKamacSheet.cpp" />
     <ClCompile Include="CNFStatic.cpp" />
     <ClCompile Include="CPPAbout.cpp" />
     <ClCompile Include="CPPMain.cpp" />
     <ClCompile Include="CPPOptions.cpp" />
+    <ClCompile Include="itzamDatabase.cpp" />
+    <ClCompile Include="itzam\itzam_btree.c" />
+    <ClCompile Include="itzam\itzam_data.c" />
+    <ClCompile Include="itzam\itzam_util.c" />
     <ClCompile Include="Kamac.cpp" />
     <ClCompile Include="NTRAY.CPP" />
     <ClCompile Include="pch.cpp" />
@@ -194,8 +212,11 @@
     <ResourceCompile Include="Kamac.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\about.ico" />
+    <Image Include="res\home.ico" />
     <Image Include="res\Kamac.bmp" />
     <Image Include="res\Kamac.ico" />
+    <Image Include="res\Options.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -19,7 +19,8 @@ CPPOptions::CPPOptions(CKamacOptions& ko)
 	, bStartWithOS(FALSE), koOPtions(ko)
 	, ulMonitorSize(ko.ulMonitorSize)
 {
-
+	m_pPSP->pszIcon = MAKEINTRESOURCE(IDI_ICON_OPTIONS);
+	m_pPSP->dwFlags |= PSP_USEICONID;
 }
 
 

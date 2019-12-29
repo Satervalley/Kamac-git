@@ -21,7 +21,10 @@ IMPLEMENT_DYNAMIC(CPPMain, CPropertyPage)
 CPPMain::CPPMain(CKamacOptions& ko)
 	: CPropertyPage(IDD_CPPMain), koOptions(ko)
 {
-	
+	//m_pPSP->hIcon = (HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_HOME), 
+	//	IMAGE_ICON, 24, 24, LR_DEFAULTCOLOR| LR_LOADTRANSPARENT);
+	m_pPSP->pszIcon = MAKEINTRESOURCE(IDI_ICON_HOME);
+	m_pPSP->dwFlags |= PSP_USEICONID;
 }
 
 
@@ -118,8 +121,15 @@ void CPPMain::UpdateMousePos(void)
 {
 	CPoint pt;
 	::GetCursorPos(&pt);
-	strMouse.Format(_T("Mouse pointer:\t%d %d"), pt.x, pt.y);
 
+	UpdateMousePos(pt.x, pt.y);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CPPMain::UpdateMousePos(int cx, int cy)
+{
+	strMouse.Format(_T("Mouse pointer:\t%d %d"), cx, cy);
 }
 
 
@@ -178,7 +188,7 @@ void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG6
 		str.Format(_T("%llu.%02llum"), ulMDSession / 100ull, ulMDSession % 100ull);
 	}
 	lcMain.SetItemText(6, 4, str);
-	if (ulMDToday < 100ll)
+	if (ulMDToday < 100ull)
 	{
 		str.Format(_T("%llucm"), ulMDToday);
 	}
@@ -187,7 +197,7 @@ void CPPMain::UpdateMouseDistance(ULONG64 ulMDSession, ULONG64 ulMDToday, ULONG6
 		str.Format(_T("%llu.%02llum"), ulMDToday / 100ull, ulMDToday % 100ull);
 	}
 	lcMain.SetItemText(6, 3, str);
-	if (ulMDTotal < 100ll)
+	if (ulMDTotal < 100ull)
 	{
 		str.Format(_T("%llucm"), ulMDTotal);
 	}

@@ -8,7 +8,7 @@
 #include "CKamacOptions.h"
 #include "SimpleIni.h"
 #include "NTRAY.H"
-
+#include <string>
 
 class CDisplayMan
 {
@@ -42,9 +42,9 @@ public:
 		return ULONG32(sqrt(d1 * d1 + d2 * d2) + 0.5);
 	}
 protected:
-	ULONG32 ulMonitorSize{ 3556 };
-	ULONG32 ulWidth, ulHeight;
-	double dWidth, dHeight;
+	ULONG32 ulMonitorSize{ 3556 };	// screen diagonal size
+	ULONG32 ulWidth, ulHeight;	// screen resolution
+	double dWidth, dHeight;	// screen physical size
 };
 
 
@@ -61,8 +61,9 @@ public:
 	CKamacSheet(LPCTSTR pszCaption, CWnd* pParentWnd = nullptr, UINT iSelectPage = 0);
 	virtual ~CKamacSheet();
 protected:
+	DECLARE_MESSAGE_MAP()
 
-	HICON m_hIcon;
+	HICON m_hIcon, m_hIconSmall;
 	CPPMain* ppMain{ new CPPMain(koOptions) };
 	CPPOptions* ppOptions{ new CPPOptions(koOptions) };
 	CPPAbout* ppAbout{ new CPPAbout() };
@@ -71,6 +72,7 @@ protected:
 	CSimpleIni siConfig;
 	CString strExeFileName;
 	CString strIniFileName;
+	std::string strHistoryFileName;
 	UINT uTimerID = 1;
 	int nAutoSaveInterval = 100;
 	ULONG64 ullToday = 0;
@@ -96,8 +98,7 @@ protected:
 	void ULLToSystemtime(const ULONG64& ull, SYSTEMTIME& st);
 	ULONG32 CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs = FALSE);
 	void MakeTrayTipInfo(void);
-protected:
-	DECLARE_MESSAGE_MAP()
+	BOOL SaveDayDate(const SYSTEMTIME & st);
 public:
 	afx_msg void OnRawInput(UINT nInputcode, HRAWINPUT hRawInput);
 	afx_msg void OnClose();

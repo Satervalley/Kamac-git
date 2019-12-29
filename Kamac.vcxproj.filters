@@ -66,6 +66,21 @@
     <ClInclude Include="CKamacOptions.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CHistoryMan.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="itzam\itzam.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="itzam\itzam_errors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="itzamDatabase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HighColorTab.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CKamacCmdLineInfo.cpp">
@@ -104,6 +119,21 @@
     <ClCompile Include="XNamedColors.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CHistoryMan.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="itzam\itzam_btree.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="itzam\itzam_data.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="itzam\itzam_util.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="itzamDatabase.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Kamac.rc">
@@ -115,6 +145,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\Kamac.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\home.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Options.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\about.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

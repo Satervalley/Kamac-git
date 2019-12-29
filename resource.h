@@ -10,6 +10,11 @@
 #define IDD_CPPAbout                    135
 #define IDB_BITMAP1                     138
 #define IDR_MENU_TRAY                   139
+#define IDI_ICON1                       140
+#define IDI_ICON_HOME                   140
+#define IDI_ICON_OPTIONS                141
+#define IDI_ICON3                       142
+#define IDI_ICON_ABOUT                  142
 #define IDC_CHECK1                      1002
 #define IDC_CHECK_STARTWITHOS           1002
 #define IDC_LIST_MAIN                   1003
@@ -31,7 +36,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32778
 #define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101

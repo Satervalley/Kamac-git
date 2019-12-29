@@ -23,7 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	CXHTMLStatic htmlContent;
 	const TCHAR * htmlStr = {
-							_T("<b><font size=\"+8\" color=\"#ff8000\"><center>Kamac V0.0</center></font></b><br><br>")
+							_T("<b><font size=\"+8\" color=\"#ff8000\"><center>Kamac</center></font></b><br><br>")
 							_T("<font size=\"+6\" color=\"#a08060\"><center>Keyboard and mouse activity counter</center></font><br>")
 							_T("<font color=\"#C6D6FD\"><hr size=2></font><br>")
 							_T("<font color=\"#408010\"><center>%s</center></font><br>")

@@ -17,7 +17,8 @@ IMPLEMENT_DYNAMIC(CPPAbout, CPropertyPage)
 CPPAbout::CPPAbout()
 	: CPropertyPage(IDD_CPPAbout)
 {
-
+	m_pPSP->pszIcon = MAKEINTRESOURCE(IDI_ICON_ABOUT);
+	m_pPSP->dwFlags |= PSP_USEICONID;
 }
 
 
@@ -49,7 +50,7 @@ BOOL CPPAbout::OnInitDialog()
 	// TODO:  在此添加额外的初始化
 	htmlContent.ModifyStyleEx(WS_EX_TRANSPARENT, 0);
 	CString str, strVer;
-	strVer.Format(_T("Version %d.%d Build %d.%d on %d.%d.%d"), AutoVersion::nMajor, AutoVersion::nMinor,
+	strVer.Format(_T("Version %d.%02d Build %d.%d on %d.%02d.%02d"), AutoVersion::nMajor, AutoVersion::nMinor,
 		AutoVersion::nBuild, AutoVersion::nRevision, AutoVersion::nYear, AutoVersion::nMonth, AutoVersion::nDay);
 	str.Format(htmlStr, strVer, AutoVersion::nYear);
 	htmlContent.SetWindowText(str);

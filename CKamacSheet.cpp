@@ -4,7 +4,8 @@
 #include "pch.h"
 #include "Kamac.h"
 #include "CKamacSheet.h"
-
+#include "Kamac_av.h"
+#include "HighColorTab.hpp"
 
 
 UINT WM_TRAYICONNOTIFY = WM_USER + 1;
@@ -160,16 +161,22 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 		if (!b)
 			ppMain->UpdateMouseMiddleClick(kmdSession.ulMiddleClick, kmdToday.ulMiddleClick, kmdTotal.ulMiddleClick);
 	}
+	// 下面代码因win鼠标加速，计算不准确
+	/*
 	USHORT f = 0x0001;
 	BOOL bAbs = rm.usFlags & f;
 	ULONG32 ulmd = CaculateMoveDistance(rm.lLastX, rm.lLastY, bAbs);
+	*/
+	CPoint pt;
+	::GetCursorPos(&pt);
+	ULONG32 ulmd = CaculateMoveDistance(pt.x, pt.y, TRUE);
 	kmdSession.IncDistance(ulmd);
 	kmdToday.IncDistance(ulmd);
 	kmdTotal.IncDistance(ulmd);
 	if (!b)
 	{
 		ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
-		ppMain->UpdateMousePos();
+		ppMain->UpdateMousePos(pt.x, pt.y);
 		ppMain->UpdateInfo();
 	}
 }
@@ -202,12 +209,15 @@ BOOL CKamacSheet::OnInitDialog()
 {
 	BOOL bResult = CPropertySheet::OnInitDialog();
 
-	// TODO:  在此添加您的专用代码
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+//	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = (HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+		::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
-	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	m_hIconSmall = (HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+		::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
+	SetIcon(m_hIconSmall, FALSE);		// 设置小图标
 
-	tniTray.Create(this, 1, _T("Kamac"), m_hIcon, WM_TRAYICONNOTIFY);
+	tniTray.Create(this, 1, _T("Kamac"), m_hIconSmall, WM_TRAYICONNOTIFY);
 	tniTray.HideIcon();
 
 	ppOptions->strExeFileName = strExeFileName;
@@ -220,6 +230,8 @@ BOOL CKamacSheet::OnInitDialog()
 		::AfxMessageBox(_T("You'd better input your monitor size before we start!"), MB_OK | MB_ICONINFORMATION);
 		SetActivePage(1);
 	}
+
+	HighColorTab::UpdateImageList(*this);
 
 	CPoint pt;
 	::GetCursorPos(&pt);
@@ -258,7 +270,11 @@ void CKamacSheet::GetIniFileName(void)
 	{
 		str = str.Left(nPos + 1);
 	}
+	else
+		str += _T(".");
 	strIniFileName = str + _T("ini");
+	strHistoryFileName = CT2CA(str);
+	strHistoryFileName += "his";
 }
 
 
@@ -366,8 +382,10 @@ BOOL CKamacSheet::CheckToday(void)
 	SYSTEMTIME st;
 	::GetLocalTime(&st);
 	BOOL bRes = st.wYear != stToday.wYear || st.wMonth != stToday.wMonth || st.wDay != stToday.wDay;
+//	bRes = true;	// todo: delete this line when release
 	if (bRes)
 	{
+		SaveDayDate(stToday);
 		stToday = st;
 		kmdToday.Reset();
 		SaveConfig();
@@ -469,7 +487,8 @@ void CKamacSheet::MakeTrayTipInfo(void)
 	{
 		strDistTotal.Format(_T("%llu.%02llum"), ulMDTotal / 100ull, ulMDTotal % 100ull);
 	}
-	strTrayTipInfo.Format(_T("Kamac\n\nKBD: %u  %u  %u\nMLC: %u  %u  %u\nDIS: %s  %s  %s"), 
+	strTrayTipInfo.Format(_T("Kamac V%d.%02d Build %d.%d\n\nKBD: %u  %u  %u\nMLC: %u  %u  %u\nDIS: %s  %s  %s"), 
+		AutoVersion::nMajor, AutoVersion::nMinor, AutoVersion::nBuild, AutoVersion::nRevision,
 		kmdTotal.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdSession.ulKeyStrokes,
 		kmdTotal.ulLeftClick, kmdToday.ulLeftClick, kmdSession.ulLeftClick,
 		strDistTotal, strDistToday, strDistSession);
@@ -555,3 +574,30 @@ void CKamacSheet::OnTrayExit()
 	tniTray.HideIcon();
 	SendMessage(WM_CLOSE);
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+BOOL CKamacSheet::SaveDayDate(const SYSTEMTIME& st)
+{
+	BOOL bRes = false;
+	//UnqliteDatabase db;
+	//if (db.open(strHistoryFileName))
+	//{
+	//	std::string strEngineName;
+	//	db.getEngineName(strEngineName);
+
+	//	UnqliteQuery query(db);
+	//	std::string strKey;
+	//	char buf[10];
+	//	unsigned char data[sizeof(CKMData) * 2];
+	//	int pos = 0;
+	//	::snprintf(buf, 10, "%04d%02d%02d", st.wYear, st.wMonth, st.wDay);
+	//	strKey = buf;
+	//	pos = kmdToday.PutToBuffer(data, pos);
+	//	kmdTotal.PutToBuffer(data, pos);
+	//	bRes = query.storeData(strKey, data, sizeof(CKMData) * 2);
+	//	db.close();
+	//}
+	return bRes;
+}
+

@@ -56,5 +56,27 @@ public:
 		ullDistance += inc;
 		return ullDistance;
 	}
+
+	int PutToBuffer(unsigned char* pBuf, int pos)
+	{
+		if (pBuf && pos >= 0)
+		{
+			pBuf += pos;
+			::memcpy(pBuf, this, sizeof(CKMData));
+			pos += sizeof(CKMData);
+		}
+		return pos;
+	}
+
+	int GetFromBuffer(unsigned char* pBuf, int pos)
+	{
+		if (pBuf && pos >= 0)
+		{
+			pBuf += pos;
+			::memcpy(this, pBuf, sizeof(CKMData));
+			pos += sizeof(CKMData);
+		}
+		return pos;
+	}
 };
 
