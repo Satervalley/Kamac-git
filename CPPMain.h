@@ -41,4 +41,7 @@ protected:
 	//CStatic statInfo;
 	CNFStatic statInfo;
 	CKamacOptions& koOptions;
+	CImageList ilImgs;
+
+	void InitImageList(void);
 };

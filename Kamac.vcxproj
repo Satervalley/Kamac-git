@@ -92,6 +92,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)itzam\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4703</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,6 +133,8 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)Unqlite\;$(ProjectDir)UnqliteWrapper\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -216,7 +219,14 @@
     <Image Include="res\home.ico" />
     <Image Include="res\Kamac.bmp" />
     <Image Include="res\Kamac.ico" />
+    <Image Include="res\Key-k.ico" />
+    <Image Include="res\Keyboard.ico" />
+    <Image Include="res\Mouse-left.ico" />
+    <Image Include="res\Mouse-middle.ico" />
+    <Image Include="res\Mouse-right.ico" />
+    <Image Include="res\Mouse.ico" />
     <Image Include="res\Options.ico" />
+    <Image Include="res\Walk.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -47,38 +47,87 @@ BEGIN_MESSAGE_MAP(CPPMain, CPropertyPage)
 END_MESSAGE_MAP()
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void CPPMain::InitImageList(void)
+{
+	ilImgs.Create(16, 16, ILC_COLOR32, 0, 4);
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_KEYBOARD), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_MOUSE), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_MOUSE_LEFT), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_MOUSE_RIGHT), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_MOUSE_MIDDLE), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_KEY_K), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+	ilImgs.Add((HICON)::LoadImage(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_WALK), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
+}
+
+
 // CPPMain 消息处理程序
 BOOL CPPMain::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	InitImageList();
 	::SetWindowTheme(lcMain, L"Explorer", nullptr);
 	lcMain.SetExtendedStyle(lcMain.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | 
 		LVS_EX_BORDERSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_ONECLICKACTIVATE);
+	ListView_SetExtendedListViewStyle(lcMain, ListView_GetExtendedListViewStyle(lcMain) | LVS_EX_SUBITEMIMAGES);
+	lcMain.SetImageList(&ilImgs, LVSIL_SMALL);
 	CRect rect;
 	int nw;
 	lcMain.GetClientRect(rect);
-	lcMain.InsertColumn(0, _T("Device"), 0, 96);
+	lcMain.InsertColumn(0, _T("Device"), 0, 104);
 	lcMain.InsertColumn(1, _T("Item"), 0, 128);
-	nw = (rect.Width() - 224) / 3;
+	nw = (rect.Width() - 232) / 3;
 	lcMain.InsertColumn(2, _T("Total"), 0, nw);
 	lcMain.InsertColumn(3, _T("Today"), 0, nw);
 	lcMain.InsertColumn(4, _T("Session"), 0, nw);
 
-	lcMain.InsertItem(lcMain.GetItemCount(), _T("Keyboard"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""));
-	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Keystrokes"));
+	LV_ITEM li;
 
-	lcMain.InsertItem(lcMain.GetItemCount(), _T("Mouse"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""));
+	lcMain.InsertItem(lcMain.GetItemCount(), _T("Keyboard"), 0);
+	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
+	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Keystrokes"));
+	li.iItem = 1;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 5;
+	lcMain.SetItem(&li);
+
+	lcMain.InsertItem(lcMain.GetItemCount(), _T("Mouse"), 1);
+	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Left click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""));
+	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Right click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""));
+	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Middle click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""));
+	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Distance"));
+	li.iItem = 3;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 2;
+	lcMain.SetItem(&li);
+	li.iItem = 4;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 3;
+	lcMain.SetItem(&li);
+	li.iItem = 5;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 4;
+	lcMain.SetItem(&li);
+	li.iItem = 6;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 6;
+	lcMain.SetItem(&li);
 
 //	::SetWindowLongPtr(statInfo, GWL_EXSTYLE, statInfo.GetExStyle() | WS_EX_COMPOSITED);
 	int nsw = ::GetSystemMetrics(SM_CXSCREEN);

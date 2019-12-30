@@ -156,5 +156,26 @@
     <Image Include="res\about.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\Keyboard.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Mouse.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Mouse-left.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Mouse-right.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Mouse-middle.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Key-k.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Walk.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -13,8 +13,15 @@
 #define IDI_ICON1                       140
 #define IDI_ICON_HOME                   140
 #define IDI_ICON_OPTIONS                141
-#define IDI_ICON3                       142
 #define IDI_ICON_ABOUT                  142
+#define IDI_ICON_KEYBOARD               143
+#define IDI_ICON_MOUSE                  144
+#define IDI_ICON_MOUSE_LEFT             145
+#define IDI_ICON_MOUSE_RIGHT            146
+#define IDI_ICON_MOUSE_MIDDLE           147
+#define IDI_ICON_KEY_K                  148
+#define IDI_ICON2                       149
+#define IDI_ICON_WALK                   149
 #define IDC_CHECK1                      1002
 #define IDC_CHECK_STARTWITHOS           1002
 #define IDC_LIST_MAIN                   1003
@@ -36,7 +43,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_RESOURCE_VALUE        150
 #define _APS_NEXT_COMMAND_VALUE         32778
 #define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
