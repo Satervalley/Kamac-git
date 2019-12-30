@@ -11,4 +11,4 @@ It's simple and clean, almost no system overhead. Enjoy!
 * Dev platform: Visual Studio comm 2019  
 * Framework: MFC  
   
-![Main](../screenshots/main.png)
+![Main](../../master/Screenshots/main.png)
