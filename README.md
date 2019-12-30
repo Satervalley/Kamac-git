@@ -1,4 +1,4 @@
-# Kamac-git
+# Kamac  
 Kamac aka "Keyboard and mouse activity counter" can count and show keyboard and mouse activities, including:  
   
 * keystrikes  
