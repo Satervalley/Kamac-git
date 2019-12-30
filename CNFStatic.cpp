@@ -75,6 +75,8 @@ void CNFStatic::Draw(CDC& dc, CRect& rect, CDC * pDCTarget)
 //----------------------------------------------------------------------------------------------------------------------
 void CNFStatic::PrepareMemDC(CDC& dc, int nw, int nh)
 {
+	if (font.operator HFONT())
+		font.DeleteObject();
 	if (bmp.operator HBITMAP())
 		bmp.DeleteObject();
 	if (dcMem)
@@ -83,7 +85,15 @@ void CNFStatic::PrepareMemDC(CDC& dc, int nw, int nh)
 	dcMem.CreateCompatibleDC(&dc);
 	bmp.CreateCompatibleBitmap(&dc, nw, nh);
 	dcMem.SelectObject(bmp);
-	dcMem.SelectStockObject(SYSTEM_FONT);
+	NONCLIENTMETRICS ncm;
+	ncm.cbSize = sizeof(NONCLIENTMETRICS);
+	if (::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0))
+	{
+		font.CreateFontIndirect(&(ncm.lfMessageFont));
+		dcMem.SelectObject(&font);
+	}
+	else
+		dcMem.SelectStockObject(SYSTEM_FONT);
 	dcMem.SetTextColor(::GetSysColor(COLOR_INFOTEXT));
 }
 

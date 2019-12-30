@@ -20,6 +20,7 @@ protected:
 	CString strContent;
 	CDC dcMem;
 	CBitmap bmp;
+	CFont font;
 
 
 public:
