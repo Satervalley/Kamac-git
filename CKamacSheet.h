@@ -79,6 +79,7 @@ protected:
 	SYSTEMTIME stToday;
 	CTrayNotifyIcon tniTray;
 	LONG lLastX{ 0 }, lLastY{ 0 };
+	USHORT usLastKey{ 0 };
 	CDisplayMan dmDisplay;
 	CString strTrayTipInfo;
 
@@ -98,6 +99,7 @@ protected:
 	void ULLToSystemtime(const ULONG64& ull, SYSTEMTIME& st);
 	ULONG32 CaculateMoveDistance(LONG xc, LONG yc, BOOL bAbs = FALSE);
 	void MakeTrayTipInfo(void);
+	//LPCTSTR MakeTrayTipInfo(void);
 	BOOL SaveDayDate(const SYSTEMTIME & st);
 public:
 	afx_msg void OnRawInput(UINT nInputcode, HRAWINPUT hRawInput);

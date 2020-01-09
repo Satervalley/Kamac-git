@@ -69,16 +69,10 @@
     <ClInclude Include="CHistoryMan.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="itzam\itzam.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="itzam\itzam_errors.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="itzamDatabase.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="HighColorTab.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CUtil.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,18 +114,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CHistoryMan.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="itzam\itzam_btree.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="itzam\itzam_data.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="itzam\itzam_util.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="itzamDatabase.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -119,15 +119,11 @@ void CKamacSheet::ProcessKeyboardInput(RAWKEYBOARD& rk)
 		kmdSession.IncKeyStrokes();
 		kmdToday.IncKeyStrokes();
 		kmdTotal.IncKeyStrokes();
-		if (IsIconic())
-		{
-			int i = 0;
- 			i++; 
-		}
-		if (!IsIconic())
+		usLastKey = rk.MakeCode;
+    	if (!IsIconic())
 		{
 			ppMain->UpdateKeyboard(kmdSession.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdTotal.ulKeyStrokes, rk.MakeCode);
-			ppMain->UpdateInfo();
+			//ppMain->UpdateInfo();
 		}
 	}
 }
@@ -176,8 +172,9 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 	if (!b)
 	{
 		ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
-		ppMain->UpdateMousePos(pt.x, pt.y);
-		ppMain->UpdateInfo();
+//		ppMain->UpdateMousePos(pt.x, pt.y);
+//		ppMain->UpdateInfo();
+		ppMain->statInfo.UpdateMousePoint(pt.x, pt.y);
 	}
 }
 
@@ -222,7 +219,7 @@ BOOL CKamacSheet::OnInitDialog()
 
 	ppOptions->strExeFileName = strExeFileName;
 	if (!CheckToday())
-		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
+		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 
 	if (!koOptions.bMonitorSizeConfirmed)
 	{
@@ -389,7 +386,7 @@ BOOL CKamacSheet::CheckToday(void)
 		stToday = st;
 		kmdToday.Reset();
 		SaveConfig();
-		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
+		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 	}
 	return bRes;
 }
@@ -456,44 +453,31 @@ HRESULT CKamacSheet::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::MakeTrayTipInfo(void)
 {
-	ULONG64 ulMDSession = kmdSession.ullDistance;
-	ulMDSession /= 100ull;	// to cm
-	ULONG64 ulMDToday = kmdToday.ullDistance;
-	ulMDToday /= 100ull;
-	ULONG64 ulMDTotal = kmdTotal.ullDistance;
-	ulMDTotal /= 100ull;
-	CString strDistSession, strDistToday, strDistTotal;
-	if (ulMDSession < 100ull)
-	{
-		strDistSession.Format(_T("%llucm"), ulMDSession);
-	}
-	else
-	{
-		strDistSession.Format(_T("%llu.%02llum"), ulMDSession / 100ull, ulMDSession % 100ull);
-	}
-	if (ulMDToday < 100ll)
-	{
-		strDistToday.Format(_T("%llucm"), ulMDToday);
-	}
-	else
-	{
-		strDistToday.Format(_T("%llu.%02llum"), ulMDToday / 100ull, ulMDToday % 100ull);
-	}
-	if (ulMDTotal < 100ll)
-	{
-		strDistTotal.Format(_T("%llucm"), ulMDTotal);
-	}
-	else
-	{
-		strDistTotal.Format(_T("%llu.%02llum"), ulMDTotal / 100ull, ulMDTotal % 100ull);
-	}
-	strTrayTipInfo.Format(_T("Kamac V%d.%02d Build %d.%d\n\nKBD: %u  %u  %u\nMLC: %u  %u  %u\nDIS: %s  %s  %s"), 
+	static TCHAR tcTotal[24], tcToday[24], tcSession[24];
+	CUtil::GetDistanceString(kmdTotal.ullDistance, tcTotal);
+	CUtil::GetDistanceString(kmdToday.ullDistance, tcToday);
+	CUtil::GetDistanceString(kmdSession.ullDistance, tcSession);
+	strTrayTipInfo.Format(_T("Kamac V%d.%02d Build %d.%d\n\nKBD: %u  %u  %u\nMLC: %u  %u  %u\nDIS: %s  %s  %s"),
 		AutoVersion::nMajor, AutoVersion::nMinor, AutoVersion::nBuild, AutoVersion::nRevision,
 		kmdTotal.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdSession.ulKeyStrokes,
 		kmdTotal.ulLeftClick, kmdToday.ulLeftClick, kmdSession.ulLeftClick,
-		strDistTotal, strDistToday, strDistSession);
+		tcTotal, tcToday, tcSession);
+		//strDistTotal, strDistToday, strDistSession);
 }
 
+/*
+LPCTSTR CKamacSheet::MakeTrayTipInfo(void)
+{
+	static TCHAR tti[200];
+	tti[0] = 0;
+	_tcscat(tti, _T("Kamac V"));
+	_tcscat(tti, CUtil::itoa(AutoVersion::nMajor));
+	_tcscat(tti, _T("."));
+	_tcscat(tti, CUtil::itoa_02d(AutoVersion::nMinor));
+	_tcscat(tti, _T(" Build "));
+	return tti;
+}
+*/
 
 //----------------------------------------------------------------------------------------------------------------------
 HRESULT CKamacSheet::OnOptionsChanged(WPARAM wParam, LPARAM lParam)
@@ -508,7 +492,6 @@ void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 {
 	CPropertySheet::OnSize(nType, cx, cy);
 
-	// TODO: 在此处添加消息处理程序代码
 	if (nType == SIZE_MINIMIZED)
 	{
 		tniTray.ShowIcon();
@@ -518,8 +501,7 @@ void CKamacSheet::OnSize(UINT nType, int cx, int cy)
 	{
 		if (::IsWindow(ppMain->m_hWnd))
 		{
-			ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal);
-			ppMain->UpdateInfo();
+			ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 		}
 	}
 }
@@ -531,6 +513,7 @@ void CKamacSheet::OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen)
 	CPropertySheet::OnDisplayChange(nImageDepth, cxScreen, cyScreen);
 
 	dmDisplay.Update(cxScreen, cyScreen, koOptions.ulMonitorSize);
+	ppMain->statInfo.UpdateResolution(cxScreen, cyScreen);
 }
 
 

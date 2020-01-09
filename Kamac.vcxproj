@@ -78,7 +78,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +141,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -177,11 +178,9 @@
     <ClInclude Include="CPPAbout.h" />
     <ClInclude Include="CPPMain.h" />
     <ClInclude Include="CPPOptions.h" />
+    <ClInclude Include="CUtil.h" />
     <ClInclude Include="HighColorTab.hpp" />
     <ClInclude Include="INIReader.h" />
-    <ClInclude Include="itzamDatabase.h" />
-    <ClInclude Include="itzam\itzam.h" />
-    <ClInclude Include="itzam\itzam_errors.h" />
     <ClInclude Include="Kamac.h" />
     <ClInclude Include="NTRAY.H" />
     <ClInclude Include="pch.h" />
@@ -200,10 +199,6 @@
     <ClCompile Include="CPPAbout.cpp" />
     <ClCompile Include="CPPMain.cpp" />
     <ClCompile Include="CPPOptions.cpp" />
-    <ClCompile Include="itzamDatabase.cpp" />
-    <ClCompile Include="itzam\itzam_btree.c" />
-    <ClCompile Include="itzam\itzam_data.c" />
-    <ClCompile Include="itzam\itzam_util.c" />
     <ClCompile Include="Kamac.cpp" />
     <ClCompile Include="NTRAY.CPP" />
     <ClCompile Include="pch.cpp" />
