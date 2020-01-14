@@ -15,6 +15,18 @@ public:
 
 	ULONG64 ullDistance{ 0 };	// as 1/10 mm
 
+
+	CKMData& operator =(const CKMData& kmd)
+	{
+		ulKeyStrokes = kmd.ulKeyStrokes;
+		ulLeftClick = kmd.ulLeftClick;
+		ulRightClick = kmd.ulRightClick;
+		ulMiddleClick = kmd.ulMiddleClick;
+		ullDistance = kmd.ullDistance;
+		return *this;
+	}
+
+
 	void Reset(void)
 	{
 		ulKeyStrokes = 0;

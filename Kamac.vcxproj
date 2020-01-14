@@ -172,8 +172,10 @@
   <ItemGroup>
     <ClInclude Include="CHistoryMan.h" />
     <ClInclude Include="CKamacCmdLineInfo.h" />
+    <ClInclude Include="CKamacDS.h" />
     <ClInclude Include="CKamacOptions.h" />
     <ClInclude Include="CKamacSheet.h" />
+    <ClInclude Include="CKMData.h" />
     <ClInclude Include="CNFStatic.h" />
     <ClInclude Include="CPPAbout.h" />
     <ClInclude Include="CPPMain.h" />

@@ -6,6 +6,7 @@
 #include "CKamacSheet.h"
 #include "Kamac_av.h"
 #include "HighColorTab.hpp"
+#include "CKamacDS.h"
 
 
 UINT WM_TRAYICONNOTIFY = WM_USER + 1;
@@ -38,6 +39,12 @@ void CKamacSheet::Init(void)
 	GetIniFileName();
 	LoadConfig();
 	dmDisplay.Update(koOptions.ulMonitorSize);
+	CKamacDS_Storage dss;
+	if (!CKamacDS_File::FileExist(strHistoryFileName))
+	{
+		dss.Create(strHistoryFileName);
+//		dss.Close();
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -270,8 +277,7 @@ void CKamacSheet::GetIniFileName(void)
 	else
 		str += _T(".");
 	strIniFileName = str + _T("ini");
-	strHistoryFileName = CT2CA(str);
-	strHistoryFileName += "his";
+	strHistoryFileName = str + _T("his");
 }
 
 
@@ -581,6 +587,15 @@ BOOL CKamacSheet::SaveDayDate(const SYSTEMTIME& st)
 	//	bRes = query.storeData(strKey, data, sizeof(CKMData) * 2);
 	//	db.close();
 	//}
+	CKamacDS_Storage dss;
+	if (dss.Open(strHistoryFileName))
+	{
+		CDS_Record rec;
+		rec.dkDate = MakeDateKey(st.wYear, st.wMonth, st.wDay);
+		rec.kmdDay = kmdToday;
+		rec.kmdTotal = kmdToday;
+		bRes = dss.Append(rec);
+	}
 	return bRes;
 }
 

@@ -57,7 +57,6 @@ BOOL CKamacApp::InitInstance()
 	CKamacCmdLineInfo cli;
 	ParseCommandLine(cli);
 	
-
 	// 标准初始化
 	// 如果未使用这些功能并希望减小
 	// 最终可执行文件的大小，则应移除下列

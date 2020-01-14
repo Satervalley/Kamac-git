@@ -72,7 +72,7 @@ protected:
 	CSimpleIni siConfig;
 	CString strExeFileName;
 	CString strIniFileName;
-	std::string strHistoryFileName;
+	CString strHistoryFileName;
 	UINT uTimerID = 1;
 	int nAutoSaveInterval = 100;
 	ULONG64 ullToday = 0;
