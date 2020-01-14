@@ -7,6 +7,6 @@ namespace AutoVersion
 	static const int nDay = 14;
 	static const int nMajor = 0;
 	static const int nMinor = 0;
-	static const int nBuild = 251;
-	static const int nRevision = 462;
+	static const int nBuild = 252;
+	static const int nRevision = 463;
 }

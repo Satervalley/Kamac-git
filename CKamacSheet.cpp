@@ -225,8 +225,8 @@ BOOL CKamacSheet::OnInitDialog()
 	tniTray.HideIcon();
 
 	ppOptions->strExeFileName = strExeFileName;
-	if (!CheckToday())
-		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
+	CheckToday();
+	ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 
 	if (!koOptions.bMonitorSizeConfirmed)
 	{
@@ -374,7 +374,9 @@ void CKamacSheet::OnTimer(UINT_PTR nIDEvent)
 		SaveConfig();
 		n = 0;
 	}
-	CheckToday();
+	if(CheckToday())
+		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
+
 	CPropertySheet::OnTimer(nIDEvent);
 }
 
@@ -392,7 +394,7 @@ BOOL CKamacSheet::CheckToday(void)
 		stToday = st;
 		kmdToday.Reset();
 		SaveConfig();
-		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
+		//ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 	}
 	return bRes;
 }

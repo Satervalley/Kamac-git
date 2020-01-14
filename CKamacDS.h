@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include <vector>
+//#include <vector>
 #include "CKMData.h"
 
 
@@ -11,11 +11,17 @@ constexpr Date_Key Date_Key_NULL = 0 ;
 
 #define MakeDateKey(y, m, d) (((y) << 16) + ((m) << 8) + (d))
 
+constexpr Date_Key Date_Key_Min = MakeDateKey(2020, 1, 1);
+
+
+//----------------------------------------------------------------------------------------------------------------------
 int Date_Key_Comp(Date_Key dk1, Date_Key dk2)
 {
 	return dk1 < dk2 ? -1 : (dk1 > dk2 ? 1 : 0);
 }
 
+
+//----------------------------------------------------------------------------------------------------------------------
 Date_Key Today(void)
 {
 	SYSTEMTIME st;
@@ -23,6 +29,8 @@ Date_Key Today(void)
 	return MakeDateKey(st.wYear, st.wMonth, st.wDay);
 }
 
+
+//----------------------------------------------------------------------------------------------------------------------
 #pragma pack(push, rec, 4)
 class CDS_Record
 {
@@ -31,11 +39,15 @@ public:
 	CKMData kmdDay;
 	CKMData kmdTotal;
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	void Reset(void)
 	{
 		Reset(Date_Key_NULL);
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	void Reset(Date_Key dk)
 	{
 		dkDate = dk;
@@ -44,16 +56,21 @@ public:
 	}
 
 
+	//----------------------------------------------------------------------------------------------------------------------
 	ULONG32 MouseTotal(void) const
 	{
 		return kmdDay.ulLeftClick + kmdDay.ulRightClick + kmdDay.ulMiddleClick;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	ULONG32 ActivityTotal(void) const
 	{
 		return MouseTotal() + kmdDay.ulKeyStrokes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record& operator =(const CDS_Record& rec)
 	{
 		dkDate = rec.dkDate;
@@ -63,12 +80,15 @@ public:
 	}
 };
 
+
+//----------------------------------------------------------------------------------------------------------------------
 constexpr size_t Record_Size = sizeof(CDS_Record);
 
 #pragma pack(pop, rec)
 
+
 typedef std::map<Date_Key, CDS_Record*> DS_Key_Record_Map;
-typedef std::vector<CDS_Record*> DS_Record_Vector;
+//typedef std::vector<CDS_Record*> DS_Record_Vector;
 
 
 /*
@@ -85,6 +105,7 @@ typedef std::vector<CDS_Record*> DS_Record_Vector;
 class CKamacDS_File
 {
 public:
+	//----------------------------------------------------------------------------------------------------------------------
 	static bool FileExist(LPCTSTR filename)
 	{
 		DWORD dw = ::GetFileAttributes(filename);
@@ -92,6 +113,7 @@ public:
 	}
 
 
+	//----------------------------------------------------------------------------------------------------------------------
 	// open record file, if file not exist, return false, no create
 	bool Open(LPCTSTR filename)
 	{
@@ -114,6 +136,7 @@ public:
 	}
 
 
+	//----------------------------------------------------------------------------------------------------------------------
 	void Close(void)
 	{
 		if (hFile != INVALID_HANDLE_VALUE)
@@ -123,6 +146,8 @@ public:
 		}
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	// Create record file, if file exist, return false
 	bool Create(LPCTSTR filename)
 	{
@@ -132,8 +157,60 @@ public:
 		bool bRes = false;
 		hFile = ::CreateFile(filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_NEW,
 			FILE_ATTRIBUTE_NORMAL, nullptr);
+		bRes = SaveBasic();
+		return bRes;
+	}
+
+protected:
+	static const char* const DS_HEAD;
+	static const USHORT usVersion;
+	Date_Key dkFirstDay{ Date_Key_NULL };
+	CDS_Record recKeyMost;
+	CDS_Record recMouseMost;
+	CDS_Record recActivityMost;
+	ULONG32 ulRecCount{ 0 };
+
+	HANDLE hFile{ INVALID_HANDLE_VALUE };
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	CKamacDS_File()
+	{
+
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	virtual ~CKamacDS_File()
+	{
+		Close();
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool LoadBasic(void)
+	{
+		bool bRes = false;
+		if (hFile != INVALID_HANDLE_VALUE)	// opened
+		{ 
+			::SetFilePointer(hFile, 10l, nullptr, FILE_BEGIN);
+			bRes = ReadFromFile(dkFirstDay);
+			bRes = bRes && ReadRecord(recKeyMost);
+			bRes = bRes && ReadRecord(recMouseMost);
+			bRes = bRes && ReadRecord(recActivityMost);
+			bRes = bRes && ReadFromFile(ulRecCount);
+		}
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool SaveBasic(void)
+	{
+		bool bRes = false;
 		if (hFile != INVALID_HANDLE_VALUE)	// create ok
 		{
+			::SetFilePointer(hFile, 0, nullptr, FILE_BEGIN);
 			DWORD dwwb = 0;
 			bRes = ::WriteFile(hFile, DS_HEAD, 8, &dwwb, nullptr);
 			bRes = bRes && WriteToFile(usVersion);
@@ -151,57 +228,29 @@ public:
 		return bRes;
 	}
 
-protected:
-	static const char* const DS_HEAD;
-	static const USHORT usVersion;
-	Date_Key dkFirstDay{ Date_Key_NULL };
-	CDS_Record recKeyMost;
-	CDS_Record recMouseMost;
-	CDS_Record recActivityMost;
-	ULONG32 ulRecCount{ 0 };
 
-	HANDLE hFile{ INVALID_HANDLE_VALUE };
-
-	CKamacDS_File()
-	{
-
-	}
-
-	virtual ~CKamacDS_File()
-	{
-		Close();
-	}
-
-	bool LoadBasic(void)
-	{
-		bool bRes = false;
-		if (hFile != INVALID_HANDLE_VALUE)	// opened
-		{ 
-			::SetFilePointer(hFile, 10l, nullptr, FILE_BEGIN);
-			bRes = ReadFromFile(dkFirstDay);
-			bRes = bRes && ReadRecord(recKeyMost);
-			bRes = bRes && ReadRecord(recMouseMost);
-			bRes = bRes && ReadRecord(recActivityMost);
-			bRes = bRes && ReadFromFile(ulRecCount);
-		}
-		return bRes;
-	}
-
+	//----------------------------------------------------------------------------------------------------------------------
 	bool IsKeyMost(const CDS_Record& rec)
 	{
 		return rec.kmdDay.ulKeyStrokes > recKeyMost.kmdDay.ulKeyStrokes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool IsMouseMost(const CDS_Record& rec)
 	{
 		return rec.MouseTotal() > recMouseMost.MouseTotal();
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool IsActivityMost(const CDS_Record& rec)
 	{
 		return rec.ActivityTotal() > recActivityMost.ActivityTotal();
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool WriteRecord(const CDS_Record& rec)
 	{
 		bool bRes = false;
@@ -215,6 +264,8 @@ protected:
 		return bRes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool ReadRecord(CDS_Record& rec)
 	{
 		bool bRes = false;
@@ -228,6 +279,8 @@ protected:
 		return bRes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	template<typename T>
 	bool WriteToFile(const T& t)
 	{
@@ -242,6 +295,8 @@ protected:
 		return bRes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	template<typename T>
 	bool ReadFromFile(T& t)
 	{
@@ -255,8 +310,11 @@ protected:
 		}
 		return bRes;
 	}
+
 };
 
+
+//----------------------------------------------------------------------------------------------------------------------
 const char * const CKamacDS_File::DS_HEAD = "KamacDS!";
 const USHORT CKamacDS_File::usVersion = 0x0001;
 
@@ -264,16 +322,21 @@ const USHORT CKamacDS_File::usVersion = 0x0001;
 class CKamacDS_Storage : public CKamacDS_File
 {
 public:
+	//----------------------------------------------------------------------------------------------------------------------
 	CKamacDS_Storage(): CKamacDS_File()
 	{
 	
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	virtual ~CKamacDS_Storage()
 	{
 
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool Append(CDS_Record& rec)
 	{
 		bool bRes = false;
@@ -332,19 +395,25 @@ protected:
 };
 
 
+//----------------------------------------------------------------------------------------------------------------------
 class CKamacDS_Man : public CKamacDS_File
 {
 public:
+	//----------------------------------------------------------------------------------------------------------------------
 	CKamacDS_Man() : CKamacDS_File()
 	{
 
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	virtual ~CKamacDS_Man()
 	{
 		Close(true);
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	void Close(bool bRelease)
 	{
 		if (bRelease)
@@ -353,6 +422,7 @@ public:
 	}
 
 
+	//----------------------------------------------------------------------------------------------------------------------
 	bool LoadAll(void)
 	{
 		bool bRes = false;
@@ -365,9 +435,12 @@ public:
 		return bRes;
 	}
 
-	bool Save(void)
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool SaveAll(void)
 	{
 		bool bRes = false;
+		bRes = SaveBasic();
 		if (bAllLoaded)
 		{
 
@@ -375,6 +448,8 @@ public:
 		return bRes;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record* Find(Date_Key dk)
 	{
 		auto it = mapRecords.find(dk);
@@ -384,19 +459,30 @@ public:
 			return nullptr;
 	}
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record* First(void)
 	{
-		if (vecRecords.size() > 0)
-			return vecRecords[0];
+		//if (vecRecords.size() > 0)
+		//	return vecRecords[0];
+		//else
+		//	return nullptr;
+		if (mapRecords.size() > 0)
+			return mapRecords.begin()->second;
 		else
 			return nullptr;
 	}
 
 
+	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record* Last(void)
 	{
-		if (vecRecords.size() > 0)
-			return *(vecRecords.rbegin());
+		//if (vecRecords.size() > 0)
+		//	return *(vecRecords.rbegin());
+		//else
+		//	return nullptr;
+		if (mapRecords.size() > 0)
+			return mapRecords.rbegin()->second;
 		else
 			return nullptr;
 	}
@@ -404,19 +490,77 @@ public:
 protected:
 	CDS_Record* pRecords{ nullptr };
 	DS_Key_Record_Map mapRecords;
-	DS_Record_Vector vecRecords;
+	//DS_Record_Vector vecRecords;
 
 	bool bAllLoaded{ false };
 
+
+	//----------------------------------------------------------------------------------------------------------------------
 	void Release(void)
 	{
 		if (pRecords)
 		{
-			delete[] pRecords;
+			delete[] reinterpret_cast<BYTE *>(pRecords);
 			pRecords = nullptr;
 		}
 		mapRecords.clear();
-		vecRecords.clear();
+		//vecRecords.clear();
 		bAllLoaded = false;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool LoadRecords(void)
+	{
+		bool bRes = false;
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			Release();
+			DWORD dwsz = ::GetFileSize(hFile, nullptr), dwrd = 0;
+			if (dwsz != INVALID_FILE_SIZE)
+			{
+				dwsz -= (18 + Record_Size * 3);
+				ulRecCount = dwsz / Record_Size;
+				dwsz = ulRecCount * Record_Size;
+				BYTE* pBuf = new BYTE[dwsz];
+				::SetFilePointer(hFile, 18 + Record_Size * 3, nullptr, FILE_BEGIN);
+				if (::ReadFile(hFile, pBuf, dwsz, &dwrd, nullptr))
+				{
+					if (dwsz == dwrd)
+					{
+						pRecords = reinterpret_cast<CDS_Record*>(pBuf);
+						for (ULONG32 i = 0; i < ulRecCount; i++)
+							VerifyAndAdd(pRecords[i]);
+						ulRecCount = mapRecords.size();
+						bRes = true;
+					}
+				}
+				else
+					ulRecCount = 0;
+			}
+			else
+			{
+				ulRecCount = 0;
+			}
+		}
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool SaveRecords(void)
+	{
+		bool bRes = false;
+
+		return bRes;
+	}
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool VerifyAndAdd(CDS_Record& pRec)
+	{
+		ASSERT(pRec);
+		bool bRes = false;
+
+		return bRes;
 	}
 };
