@@ -251,6 +251,36 @@ protected:
 
 
 	//----------------------------------------------------------------------------------------------------------------------
+	bool UpdateKeyMost(const CDS_Record& rec)
+	{
+		bool bRes = IsKeyMost(rec);
+		if (bRes)
+			recKeyMost = rec;
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool UpdateMouseMost(const CDS_Record& rec)
+	{
+		bool bRes = IsMouseMost(rec);
+		if (bRes)
+			recMouseMost = rec;
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool UpdateActivityMost(const CDS_Record& rec)
+	{
+		bool bRes = IsActivityMost(rec);
+		if (bRes)
+			recActivityMost = rec;
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool WriteRecord(const CDS_Record& rec)
 	{
 		bool bRes = false;
@@ -361,21 +391,18 @@ public:
 			bRes = WriteRecord(rec);
 			if (bRes)
 			{
-				if (IsKeyMost(rec))
+				if (UpdateKeyMost(rec))
 				{
-					recKeyMost = rec;
 					::SetFilePointer(hFile, 14l, nullptr, FILE_BEGIN);
 					WriteRecord(recKeyMost);
 				}
-				if (IsMouseMost(rec))
+				if (UpdateMouseMost(rec))
 				{
-					recMouseMost = rec;
 					::SetFilePointer(hFile, 14l + Record_Size, nullptr, FILE_BEGIN);
 					WriteRecord(recMouseMost);
 				}
-				if (IsActivityMost(rec))
+				if (UpdateActivityMost(rec))
 				{
-					recActivityMost = rec;
 					::SetFilePointer(hFile, 14l + Record_Size * 2, nullptr, FILE_BEGIN);
 					WriteRecord(recActivityMost);
 				}
@@ -443,7 +470,7 @@ public:
 		bRes = SaveBasic();
 		if (bAllLoaded)
 		{
-
+			bRes = bRes && SaveRecords();
 		}
 		return bRes;
 	}
@@ -551,16 +578,30 @@ protected:
 	bool SaveRecords(void)
 	{
 		bool bRes = false;
-
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			::SetFilePointer(hFile, 14 + Record_Size * 3, nullptr, FILE_BEGIN);
+			ulRecCount = mapRecords.size();
+			bRes = WriteToFile(ulRecCount);
+			for (auto it = mapRecords.begin(); it != mapRecords.end(); it++)
+			{
+				bRes = bRes && WriteRecord(*(it->second));
+			}
+		}
 		return bRes;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------
-	bool VerifyAndAdd(CDS_Record& pRec)
+	// return value: true, added, false, overwritten or ignored
+	bool VerifyAndAdd(CDS_Record& rec)
 	{
-		ASSERT(pRec);
-		bool bRes = false;
-
-		return bRes;
+		if (Date_Key_Comp(rec.dkDate, Date_Key_Min) < 0)	// too early, drop it
+			return false;
+		if (Date_Key_Comp(rec.dkDate, dkFirstDay) < 0)
+			dkFirstDay = rec.dkDate;
+		UpdateKeyMost(rec);
+		UpdateMouseMost(rec);
+		UpdateActivityMost(rec);
+		return mapRecords.insert_or_assign(rec.dkDate, &rec).second;
 	}
 };
