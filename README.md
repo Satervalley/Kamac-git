@@ -17,3 +17,8 @@ It's simple and clean, almost no system overhead. Enjoy!
 ![Main](../master/Screenshots/main.png)
   
 ![Options](../master/Screenshots/options.png)  
+
+### License
+<a href="http://www.wtfpl.net/"><img
+       src="http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-4.png"
+       width="80" height="15" alt="WTFPL" /></a>
