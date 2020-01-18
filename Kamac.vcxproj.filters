@@ -81,6 +81,15 @@
     <ClInclude Include="CKamacDS.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CStatVisualWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CPPStatistics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CKamacCmdLineInfo.cpp">
@@ -120,6 +129,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CHistoryMan.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CStatVisualWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CPPStatistics.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -163,6 +178,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\Walk.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Statistics.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

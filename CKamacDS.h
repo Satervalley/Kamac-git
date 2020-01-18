@@ -161,18 +161,19 @@ public:
 		return bRes;
 	}
 
-protected:
+public:
 	static const char* const DS_HEAD;
 	static const USHORT usVersion;
 	Date_Key dkFirstDay{ Date_Key_NULL };
 	CDS_Record recKeyMost;
 	CDS_Record recMouseMost;
 	CDS_Record recActivityMost;
+	CDS_Record recMoveMost;
 	ULONG32 ulRecCount{ 0 };
 
 	HANDLE hFile{ INVALID_HANDLE_VALUE };
 
-
+protected:
 	//----------------------------------------------------------------------------------------------------------------------
 	CKamacDS_File()
 	{
@@ -198,6 +199,7 @@ protected:
 			bRes = bRes && ReadRecord(recKeyMost);
 			bRes = bRes && ReadRecord(recMouseMost);
 			bRes = bRes && ReadRecord(recActivityMost);
+			bRes = bRes && ReadRecord(recMoveMost);
 			bRes = bRes && ReadFromFile(ulRecCount);
 		}
 		return bRes;
@@ -222,6 +224,8 @@ protected:
 			bRes = bRes && WriteRecord(recMouseMost);
 			recActivityMost.Reset(dkFirstDay);
 			bRes = bRes && WriteRecord(recActivityMost);
+			recMoveMost.Reset(dkFirstDay);
+			bRes = bRes && WriteRecord(recMoveMost);
 			ulRecCount = 0;
 			bRes = bRes && WriteToFile(ulRecCount);
 		}
@@ -251,6 +255,13 @@ protected:
 
 
 	//----------------------------------------------------------------------------------------------------------------------
+	bool IsMoveMost(const CDS_Record& rec)
+	{
+		return rec.kmdDay.ullDistance > recMoveMost.kmdDay.ullDistance;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
 	bool UpdateKeyMost(const CDS_Record& rec)
 	{
 		bool bRes = IsKeyMost(rec);
@@ -276,6 +287,16 @@ protected:
 		bool bRes = IsActivityMost(rec);
 		if (bRes)
 			recActivityMost = rec;
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool UpdateMoveMost(const CDS_Record& rec)
+	{
+		bool bRes = IsMoveMost(rec);
+		if (bRes)
+			recMoveMost = rec;
 		return bRes;
 	}
 
@@ -406,9 +427,14 @@ public:
 					::SetFilePointer(hFile, 14l + Record_Size * 2, nullptr, FILE_BEGIN);
 					WriteRecord(recActivityMost);
 				}
-				if (!bExist)
+				if (UpdateMoveMost(rec))
 				{
 					::SetFilePointer(hFile, 14l + Record_Size * 3, nullptr, FILE_BEGIN);
+					WriteRecord(recMoveMost);
+				}
+				if (!bExist)
+				{
+					::SetFilePointer(hFile, 14l + Record_Size * 4, nullptr, FILE_BEGIN);
 					ulRecCount++;
 					WriteToFile(ulRecCount);
 				}
@@ -456,7 +482,7 @@ public:
 		if (hFile != INVALID_HANDLE_VALUE)
 		{
 			bRes = LoadBasic();
-
+			bRes = bRes && LoadRecords();
 		}
 		bAllLoaded = bRes;
 		return bRes;
@@ -490,12 +516,9 @@ public:
 	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record* First(void)
 	{
-		//if (vecRecords.size() > 0)
-		//	return vecRecords[0];
-		//else
-		//	return nullptr;
+		it = mapRecords.begin();
 		if (mapRecords.size() > 0)
-			return mapRecords.begin()->second;
+			return it->second;
 		else
 			return nullptr;
 	}
@@ -504,21 +527,29 @@ public:
 	//----------------------------------------------------------------------------------------------------------------------
 	CDS_Record* Last(void)
 	{
-		//if (vecRecords.size() > 0)
-		//	return *(vecRecords.rbegin());
-		//else
-		//	return nullptr;
+		it = mapRecords.end();
 		if (mapRecords.size() > 0)
 			return mapRecords.rbegin()->second;
 		else
 			return nullptr;
 	}
 
+	//----------------------------------------------------------------------------------------------------------------------
+	CDS_Record* Next(void)
+	{
+		if (it != mapRecords.end())
+		{
+			it++;
+		}
+		if (it == mapRecords.end())
+			return nullptr;
+		else
+			return it->second;
+	}
 protected:
 	CDS_Record* pRecords{ nullptr };
 	DS_Key_Record_Map mapRecords;
-	//DS_Record_Vector vecRecords;
-
+	DS_Key_Record_Map::iterator it;
 	bool bAllLoaded{ false };
 
 
@@ -531,7 +562,6 @@ protected:
 			pRecords = nullptr;
 		}
 		mapRecords.clear();
-		//vecRecords.clear();
 		bAllLoaded = false;
 	}
 
@@ -546,11 +576,11 @@ protected:
 			DWORD dwsz = ::GetFileSize(hFile, nullptr), dwrd = 0;
 			if (dwsz != INVALID_FILE_SIZE)
 			{
-				dwsz -= (18 + Record_Size * 3);
+				dwsz -= (18 + Record_Size * 4);
 				ulRecCount = dwsz / Record_Size;
 				dwsz = ulRecCount * Record_Size;
 				BYTE* pBuf = new BYTE[dwsz];
-				::SetFilePointer(hFile, 18 + Record_Size * 3, nullptr, FILE_BEGIN);
+				::SetFilePointer(hFile, 18 + Record_Size * 4, nullptr, FILE_BEGIN);
 				if (::ReadFile(hFile, pBuf, dwsz, &dwrd, nullptr))
 				{
 					if (dwsz == dwrd)
@@ -580,7 +610,7 @@ protected:
 		bool bRes = false;
 		if (hFile != INVALID_HANDLE_VALUE)
 		{
-			::SetFilePointer(hFile, 14 + Record_Size * 3, nullptr, FILE_BEGIN);
+			::SetFilePointer(hFile, 14 + Record_Size * 4, nullptr, FILE_BEGIN);
 			ulRecCount = mapRecords.size();
 			bRes = WriteToFile(ulRecCount);
 			for (auto it = mapRecords.begin(); it != mapRecords.end(); it++)

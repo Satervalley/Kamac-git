@@ -2,6 +2,7 @@
 
 #include "CPPMain.h"
 #include "CPPOptions.h"
+#include "CPPStatistics.h"
 #include "CPPAbout.h"
 
 #include "CKMData.h"
@@ -66,6 +67,7 @@ protected:
 	HICON m_hIcon, m_hIconSmall;
 	CPPMain* ppMain{ new CPPMain(koOptions) };
 	CPPOptions* ppOptions{ new CPPOptions(koOptions) };
+	CPPStatistics* ppStatistics{ new CPPStatistics };
 	CPPAbout* ppAbout{ new CPPAbout() };
 	CKMData kmdTotal, kmdToday, kmdSession;
 	CKamacOptions koOptions;
@@ -101,6 +103,7 @@ protected:
 	void MakeTrayTipInfo(void);
 	//LPCTSTR MakeTrayTipInfo(void);
 	BOOL SaveDayDate(const SYSTEMTIME & st);
+	void ActivePageFromTray(int iPage);
 public:
 	afx_msg void OnRawInput(UINT nInputcode, HRAWINPUT hRawInput);
 	afx_msg void OnClose();
@@ -113,6 +116,7 @@ public:
 	
 	afx_msg void OnTrayMain();
 	afx_msg void OnTrayOptions();
+	afx_msg void OnTrayStatistics();
 	afx_msg void OnTrayAbout();
 	afx_msg void OnTrayExit();
 };

@@ -47,7 +47,6 @@ BOOL CPPAbout::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// TODO:  在此添加额外的初始化
 	htmlContent.ModifyStyleEx(WS_EX_TRANSPARENT, 0);
 	CString str, strVer;
 	strVer.Format(_T("Version %d.%02d Build %d.%d on %d.%02d.%02d"), AutoVersion::nMajor, AutoVersion::nMinor,

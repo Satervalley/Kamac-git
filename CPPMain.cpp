@@ -78,10 +78,9 @@ BOOL CPPMain::OnInitDialog()
 	lcMain.InsertColumn(4, _T("Session"), 0, nw);
 
 	LV_ITEM li;
-	int n;
-	n = lcMain.InsertItem(0, _T("Keyboard"), 0);
-	n = lcMain.InsertItem(n, _T(""), -1);
-	lcMain.SetItemText(n, 1, _T("Keystrokes"));
+	lcMain.InsertItem(0, _T("Keyboard"), 0);
+	lcMain.InsertItem(1, _T(""), -1);
+	lcMain.SetItemText(1, 1, _T("Keystrokes"));
 	li.iItem = 1;
 	li.iSubItem = 1;
 	lcMain.GetItem(&li);

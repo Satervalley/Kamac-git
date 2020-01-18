@@ -180,6 +180,8 @@
     <ClInclude Include="CPPAbout.h" />
     <ClInclude Include="CPPMain.h" />
     <ClInclude Include="CPPOptions.h" />
+    <ClInclude Include="CPPStatistics.h" />
+    <ClInclude Include="CStatVisualWnd.h" />
     <ClInclude Include="CUtil.h" />
     <ClInclude Include="HighColorTab.hpp" />
     <ClInclude Include="INIReader.h" />
@@ -189,6 +191,7 @@
     <ClInclude Include="Registry.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SimpleIni.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="XHTMLStatic.h" />
     <ClInclude Include="XNamedColors.h" />
@@ -201,6 +204,8 @@
     <ClCompile Include="CPPAbout.cpp" />
     <ClCompile Include="CPPMain.cpp" />
     <ClCompile Include="CPPOptions.cpp" />
+    <ClCompile Include="CPPStatistics.cpp" />
+    <ClCompile Include="CStatVisualWnd.cpp" />
     <ClCompile Include="Kamac.cpp" />
     <ClCompile Include="NTRAY.CPP" />
     <ClCompile Include="pch.cpp" />
@@ -223,6 +228,7 @@
     <Image Include="res\Mouse-right.ico" />
     <Image Include="res\Mouse.ico" />
     <Image Include="res\Options.ico" />
+    <Image Include="res\Statistics.ico" />
     <Image Include="res\Walk.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

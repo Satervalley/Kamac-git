@@ -22,6 +22,9 @@
 #define IDI_ICON_KEY_K                  148
 #define IDI_ICON2                       149
 #define IDI_ICON_WALK                   149
+#define IDD_CPPSTATISTICS               150
+#define IDI_ICON3                       152
+#define IDI_ICON_STATISTICS             152
 #define IDC_CHECK1                      1002
 #define IDC_CHECK_STARTWITHOS           1002
 #define IDC_LIST_MAIN                   1003
@@ -38,13 +41,14 @@
 #define ID_TRAY_MA                      32775
 #define ID_TRAY_OPTIONS                 32776
 #define ID_TRAY_MAIN                    32777
+#define ID_TRAY_STATISTICS              32778
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        150
-#define _APS_NEXT_COMMAND_VALUE         32778
+#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

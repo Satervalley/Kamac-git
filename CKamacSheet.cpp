@@ -52,6 +52,7 @@ void CKamacSheet::AddPages(void)
 {
 	AddPage(ppMain);
 	AddPage(ppOptions);
+	AddPage(ppStatistics);
 	AddPage(ppAbout);
 }
 
@@ -76,6 +77,7 @@ BEGIN_MESSAGE_MAP(CKamacSheet, CPropertySheet)
 	ON_WM_DISPLAYCHANGE()
 	ON_COMMAND(ID_TRAY_MAIN, &CKamacSheet::OnTrayMain)
 	ON_COMMAND(ID_TRAY_OPTIONS, &CKamacSheet::OnTrayOptions)
+	ON_COMMAND(ID_TRAY_STATISTICS, &CKamacSheet::OnTrayStatistics)
 	ON_COMMAND(ID_TRAY_ABOUT, &CKamacSheet::OnTrayAbout)
 	ON_COMMAND(ID_TRAY_EXIT, &CKamacSheet::OnTrayExit)
 END_MESSAGE_MAP()
@@ -526,42 +528,46 @@ void CKamacSheet::OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void CKamacSheet::OnTrayMain()
+void CKamacSheet::ActivePageFromTray(int iPage)
 {
-	// TODO: 在此添加命令处理程序代码
-	SetActivePage(0);
+	SetActivePage(iPage);
 	ShowWindow(SW_SHOW);
 	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
 	tniTray.HideIcon();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayMain()
+{
+	ActivePageFromTray(0);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::OnTrayOptions()
 {
-	// TODO: 在此添加命令处理程序代码
-	SetActivePage(1);
-	ShowWindow(SW_SHOW);
-	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
-	tniTray.HideIcon();
+	ActivePageFromTray(1);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CKamacSheet::OnTrayStatistics()
+{
+	ActivePageFromTray(2);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::OnTrayAbout()
 {
-	// TODO: 在此添加命令处理程序代码
-	SetActivePage(2);
-	ShowWindow(SW_SHOW);
-	SendMessage(WM_SYSCOMMAND, SC_RESTORE);
-	tniTray.HideIcon();
+	ActivePageFromTray(3);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::OnTrayExit()
 {
-	// TODO: 在此添加命令处理程序代码
 	tniTray.HideIcon();
 	SendMessage(WM_CLOSE);
 }
