@@ -71,8 +71,8 @@ BEGIN_MESSAGE_MAP(CKamacSheet, CPropertySheet)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
 	ON_WM_SIZE()
-	ON_MESSAGE(WM_TRAYICONNOTIFY, OnTrayIconNotify)
-	ON_MESSAGE(WM_OPTIONS_CHANGED, OnOptionsChanged)
+	ON_MESSAGE(WM_TRAYICONNOTIFY, &CKamacSheet::OnTrayIconNotify)
+	ON_MESSAGE(WM_OPTIONS_CHANGED, &CKamacSheet::OnOptionsChanged)
 	ON_WM_SIZE()
 	ON_WM_DISPLAYCHANGE()
 	ON_COMMAND(ID_TRAY_MAIN, &CKamacSheet::OnTrayMain)
@@ -227,6 +227,7 @@ BOOL CKamacSheet::OnInitDialog()
 	tniTray.HideIcon();
 
 	ppOptions->strExeFileName = strExeFileName;
+	ppStatistics->SetHisFileName(strHistoryFileName);
 	CheckToday();
 	ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 
@@ -601,7 +602,7 @@ BOOL CKamacSheet::SaveDayDate(const SYSTEMTIME& st)
 		CDS_Record rec;
 		rec.dkDate = MakeDateKey(st.wYear, st.wMonth, st.wDay);
 		rec.kmdDay = kmdToday;
-		rec.kmdTotal = kmdToday;
+		rec.kmdTotal = kmdTotal;
 		bRes = dss.Append(rec);
 	}
 	return bRes;

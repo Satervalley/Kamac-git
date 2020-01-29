@@ -46,9 +46,7 @@ BOOL CNFStatic::OnEraseBkgnd(CDC* pDC)
 //----------------------------------------------------------------------------------------------------------------------
 void CNFStatic::OnPaint()
 {
-	CPaintDC dc(this); // device context for painting
-					   // TODO: 在此处添加消息处理程序代码
-					   // 不为绘图消息调用 CStatic::OnPaint()
+	CPaintDC dc(this); 
 	CRect rect;
 	GetClientRect(&rect);
 	if (!dcMem)

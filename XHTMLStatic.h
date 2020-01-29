@@ -22,7 +22,7 @@ struct XHTMLSTATIC_APP_COMMAND
 	HWND	hWnd;			// HWND of window to receive message
 	UINT	uMessage;		// message sent to parent
 	WPARAM	wParam;			// user defined data returned in wParam parameter
-	TCHAR *	pszCommand;		// string that ties this entry to HTML hyperlink
+	const TCHAR *	pszCommand;		// string that ties this entry to HTML hyperlink
 };
 
 struct XHTMLSTATIC_CHAR_ENTITIES

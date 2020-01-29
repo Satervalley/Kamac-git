@@ -10,24 +10,21 @@ typedef ULONG32 Date_Key;
 constexpr Date_Key Date_Key_NULL = 0 ;
 
 #define MakeDateKey(y, m, d) (((y) << 16) + ((m) << 8) + (d))
+#define DateKeyYear(dk) ((dk) >> 16)
+#define DateKeyMonth(dk) (((dk) >> 8) & 0x000000ff)
+#define DateKeyDay(dk) ((dk) & 0x000000ff)
 
 constexpr Date_Key Date_Key_Min = MakeDateKey(2020, 1, 1);
 
 
 //----------------------------------------------------------------------------------------------------------------------
-int Date_Key_Comp(Date_Key dk1, Date_Key dk2)
-{
-	return dk1 < dk2 ? -1 : (dk1 > dk2 ? 1 : 0);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-Date_Key Today(void)
-{
-	SYSTEMTIME st;
-	::GetLocalTime(&st);
-	return MakeDateKey(st.wYear, st.wMonth, st.wDay);
-}
+int Date_Key_Comp(Date_Key dk1, Date_Key dk2);
+Date_Key DateKeyToday(void);
+Date_Key DateKeyYestoday(void);
+Date_Key DateKeyAddDay(Date_Key dk, int diff);
+Date_Key DateKeyNextDay(Date_Key dk);
+Date_Key DateKeyPrevDay(Date_Key dk);
+CString MakeDateString(Date_Key dk, bool bWithYear = true);
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -67,6 +64,13 @@ public:
 	ULONG32 ActivityTotal(void) const
 	{
 		return MouseTotal() + kmdDay.ulKeyStrokes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	ULONG32 DistanceAsMeter(void) const
+	{
+		return ULONG32((kmdDay.ullDistance + 5000) / 10000);
 	}
 
 
@@ -216,7 +220,7 @@ protected:
 			DWORD dwwb = 0;
 			bRes = ::WriteFile(hFile, DS_HEAD, 8, &dwwb, nullptr);
 			bRes = bRes && WriteToFile(usVersion);
-			dkFirstDay = Today();
+			dkFirstDay = DateKeyToday();
 			bRes = bRes && WriteToFile(dkFirstDay);
 			recKeyMost.Reset(dkFirstDay);
 			bRes = bRes && WriteRecord(recKeyMost);
@@ -366,10 +370,6 @@ protected:
 
 
 //----------------------------------------------------------------------------------------------------------------------
-const char * const CKamacDS_File::DS_HEAD = "KamacDS!";
-const USHORT CKamacDS_File::usVersion = 0x0001;
-
-
 class CKamacDS_Storage : public CKamacDS_File
 {
 public:

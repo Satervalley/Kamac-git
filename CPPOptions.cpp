@@ -70,7 +70,6 @@ void CPPOptions::OnClickedCheckStartWithOS()
 //----------------------------------------------------------------------------------------------------------------------
 BOOL CPPOptions::OnSetActive()
 {
-	// TODO: 在此添加专用代码和/或调用基类
 	bStartWithOS = koOPtions.bStartWithOS;
 	ulMonitorSize = koOPtions.ulMonitorSize;
 	UpdateData(FALSE);
