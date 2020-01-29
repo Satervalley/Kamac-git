@@ -17,7 +17,9 @@ It's simple and clean, almost no system overhead. Enjoy!
 ![Main](../master/Screenshots/main.png)
   
 ![Options](../master/Screenshots/options.png)  
-
+  
+![Statistics](../master/Screenshots/stat.png)
+  
 ### License  
 
 Copyright © 2020 Wang <wtcyh0707(at)gmail.com>
