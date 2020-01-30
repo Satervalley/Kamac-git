@@ -20,6 +20,7 @@ protected:
 
 protected:
 	static const int nBackgroundSize{ 32 };
+	CBitmap bmpBackground;
 	CD2DBitmapBrush* pbbBrush{ nullptr };
 	CD2DBitmap* pbmpBackground{ nullptr };
 	CString strFontName;

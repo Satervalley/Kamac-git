@@ -255,9 +255,8 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 			background[j * nBackgroundSize + i] = 0xffd6f4f8;	// white
 		}
 	}
-	CBitmap bmp;
-	bmp.CreateBitmap(nBackgroundSize, nBackgroundSize, 1, 32, background);
-	pbmpBackground = new CD2DBitmap(prt, bmp);
+	bmpBackground.CreateBitmap(nBackgroundSize, nBackgroundSize, 1, 32, background);
+	pbmpBackground = new CD2DBitmap(prt, bmpBackground);
 	//pbmpBackground->CopyFromMemory(background, nBackgroundSize * sizeof(DWORD));
 	D2D1_BITMAP_BRUSH_PROPERTIES bbp;
 	CD2DBrushProperties bp;
