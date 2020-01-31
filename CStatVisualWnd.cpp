@@ -98,24 +98,27 @@ void CStatVisualWnd::GetScaledWindowSize(CSize& sz)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::DrawAll(CRenderTarget* prt)
+{
+	ASSERT(prt);
+	ASSERT_VALID(prt);
+
+	CSize sz;
+	GetScaledWindowSize(sz);
+	prt->Clear(clrBack);
+	DrawAxis(prt, float(szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy));
+	DrawAxis(prt, float(sz.cx - szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy), false);
+	DrawGraph(prt);
+
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 LRESULT CStatVisualWnd::OnDraw2D(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRender = (CHwndRenderTarget*)lParam;
-	if (pRender->IsValid())
-	{
-		pRender->SetDpi(CD2DSizeF(96., 96.));
-		CSize sz;
-		GetScaledWindowSize(sz);
-		pRender->Clear(clrBack);
-		CRect rect(szMarginGraph.cx, 4, sz.cx - szMarginGraph.cx, sz.cy - 4 - szMarginGraph.cy);
-
-		DrawAxis(pRender, float(rect.left), float(rect.top), float(rect.bottom));
-		DrawAxis(pRender, float(rect.right), float(rect.top), float(rect.bottom), false);
-		DrawGraph(pRender);
-//		pRender->DrawText(_T("Test text!"), CD2DRectF(0., 0., 20., 50.), &brush);
-	}
-
-	return TRUE;
+	DrawAll(pRender);
+	return 0;
 }
 
 
@@ -126,9 +129,9 @@ void CStatVisualWnd::DrawAxis(CRenderTarget* prt, float at, float top, float bot
 	CD2DPointF ptFrom, ptTo;
 	CD2DSolidColorBrush brush(prt, clrBorder);
 	float h = bottom - top;
+	ptFrom.x = at;
 	for (int i = 0; i < 21; i++)
 	{
-		ptFrom.x = at;
 		ptFrom.y = ptTo.y = float(top + (h / 20.) * float(i));
 		if(i % 5 == 0)
 			ptTo.x = ptFrom.x + (bLeft ? -lg : lg);
@@ -136,11 +139,6 @@ void CStatVisualWnd::DrawAxis(CRenderTarget* prt, float at, float top, float bot
 			ptTo.x = ptFrom.x + (bLeft ? -sg : sg);
 		prt->DrawLine(ptFrom, ptTo, &brush);
 	}
-	//ptFrom.x = at;
-	//ptFrom.y = top;
-	//ptTo.x = at;
-	//ptTo.y = bottom;
-	//prt->DrawLine(ptFrom, ptTo, &brush);
 
 	int nct = gmGraph.GetCountTop(), ndt = gmGraph.GetDistanceTop();
 	int ntag = bLeft? nct : ndt;
@@ -192,7 +190,7 @@ void CStatVisualWnd::DrawAxis(CRenderTarget* prt, float at, float top, float bot
 void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 {
 	CD2DRectF rcf(rectGraphCore), rc, rcClip(rectGraph), rcLabelAll(rectGraph);
-	CD2DSolidColorBrush scb(prt, clrBorder);
+	CD2DSolidColorBrush scb(prt, clrBorder);//, scbb(prt, clrBack);
 	
 	rc.left = rcf.left + 1.f;
 	rc.top = rcf.top + 1.f;
@@ -232,7 +230,9 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	CRenderTarget* prt = GetRenderTarget();
 
 	ASSERT(prt);
-	
+
+	prt->SetDpi(CD2DSizeF(96.f, 96.f));
+
 	for (int j = 0; j < nBackgroundSize / 2; j++)
 	{
 		for (int i = 0; i < nBackgroundSize / 2; i++)
@@ -280,15 +280,10 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 
 	GetTextSize(prt, _T("88.88"), szLabelText);
 
-	DWORD dwclr;
-	dwclr = ::GetSysColor(COLOR_WINDOW);
-	clrBack = D2D1::ColorF(dwclr);
-	dwclr = ::GetSysColor(COLOR_3DSHADOW);
-	clrBorder = D2D1::ColorF(dwclr);
-	dwclr = ::GetSysColor(COLOR_WINDOWTEXT);
-	clrText = D2D1::ColorF(dwclr);
-	dwclr = ::GetSysColor(COLOR_3DHILIGHT);
-	clrHighBorder = D2D1::ColorF(dwclr);
+	clrBack = D2D1::ColorF(::GetSysColor(COLOR_WINDOW));
+	clrBorder = D2D1::ColorF(::GetSysColor(COLOR_3DSHADOW));
+	clrText = D2D1::ColorF(::GetSysColor(COLOR_WINDOWTEXT));
+	clrHighBorder = D2D1::ColorF(::GetSysColor(COLOR_3DHILIGHT));
 	return bRes;
 }
 
@@ -325,7 +320,7 @@ void CStatVisualWnd::GetTextSize(CRenderTarget* prt, const CString& str, CSize& 
 void CStatVisualWnd::DrawTextOn(CRenderTarget* prt, const CString& str, const CRect& rc, bool bRight)
 {
 	CD2DTextFormat tf(prt, strFontName, fFontSize);
-	CD2DTextLayout tl(prt, str, tf, CD2DSizeF(200., 50.));
+	CD2DTextLayout tl(prt, str, tf, CD2DSizeF(200.f, 50.f));
 	DWRITE_TEXT_METRICS dtm;
 	tl.Get()->GetMetrics(&dtm);
 	CSize sz;
@@ -368,6 +363,7 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 		int nth = rc.Height();
 		CD2DRectF rect(rc);
 		D2D1::ColorF clrs[3]{ clrCol1, clrCol2, clrCol3 };
+		CD2DSolidColorBrush brushBorder(prt, clrHighBorder);
 		for (int i = 0; i < 3; i++)
 		{
 			rect.bottom = (float)rc.bottom;
@@ -380,12 +376,11 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 			if (rect.left > (float)rc.right || rect.right < (float)rc.left)
 				continue;
 			CD2DSolidColorBrush brushColumn(prt, clrs[i]);
-			CD2DSolidColorBrush brushBorder(prt, clrHighBorder);
 			prt->DrawRectangle(rect, &brushBorder);
-			rect.left += .5;
-			rect.right -= .5;
-			rect.top += .5;
-			rect.bottom -= 1.;
+			rect.left += .5f;
+			rect.right -= .5f;
+			rect.top += .5f;
+			rect.bottom -= 1.f;
 			prt->FillRectangle(rect, &brushColumn);
 		}
 		if (bDrawLabel)
@@ -415,15 +410,19 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 {
 	if (!items)
 		return;
-	CD2DTextFormat tf(prt, strFontName, fFontSize);
-	CD2DTextLayout tlKey(prt, items[0], tf, CD2DSizeF(200., 100.));
-	CD2DTextLayout tlMouse(prt, items[1], tf, CD2DSizeF(200., 100.));
-	CD2DTextLayout tlDistance(prt, items[2], tf, CD2DSizeF(200., 100.));
+	CD2DTextFormat tfKey(prt, strFontName, fFontSize);
+	CD2DTextFormat tfMouse(prt, strFontName, fFontSize);
+	CD2DTextFormat tfDistance(prt, strFontName, fFontSize);
+	CD2DTextLayout tlKey(prt, items[0], tfKey, CD2DSizeF(200.f, 100.f));
+	CD2DTextLayout tlMouse(prt, items[1], tfMouse, CD2DSizeF(200.f, 100.f));
+	CD2DTextLayout tlDistance(prt, items[2], tfDistance, CD2DSizeF(200.f, 100.f));
 	DWRITE_TEXT_METRICS dtm;
 	tlKey.Get()->GetMetrics(&dtm);
 	float fside = dtm.height - 4.f;
 	CD2DRectF rcBorder(rc.left + 6.f, rc.top + 6.f, rc.left + 6.f + fside, rc.top + 6.f + fside);
 	CD2DRectF rcFill(rcBorder.left + .5f, rcBorder.top + .5f, rcBorder.right - .5f, rcBorder.bottom - .5f);
+//	CD2DRectF rcFrame(rc.left + 2.f, rc.top + 2.f, rc.left + 4.f, rc.top + 4.f + dtm.height);
+
 	CD2DSolidColorBrush brushBorder(prt, clrHighBorder);
 	CD2DSolidColorBrush brushFill(prt, clrCol1);
 	CD2DSolidColorBrush brushText(prt, clrText);
@@ -431,7 +430,8 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
 	prt->DrawTextLayout(pt, &tlKey, &brushText);
-	
+//	rcFrame.right += (fside + dtm.width + 8.f);
+
 	rcBorder.left += (12.f + dtm.width + fside);
 	rcBorder.right += (12.f + dtm.width + fside);
 	rcFill.left += (12.f + dtm.width + fside);
@@ -442,6 +442,7 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	pt.x = rcBorder.right + 4.f;
 	prt->DrawTextLayout(pt, &tlMouse, &brushText);
 	tlMouse.Get()->GetMetrics(&dtm);
+//	rcFrame.right += (fside + dtm.width + 8.f);
 
 	rcBorder.left += (12.f + dtm.width + fside);
 	rcBorder.right += (12.f + dtm.width + fside);
@@ -452,6 +453,11 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	prt->FillRectangle(rcFill, &brushFill);
 	pt.x = rcBorder.right + 4.f;
 	prt->DrawTextLayout(pt, &tlDistance, &brushText);
+	tlDistance.Get()->GetMetrics(&dtm);
+//	rcFrame.right += (fside + dtm.width);
+
+	//CD2DSolidColorBrush brush(prt, clrText);
+	//prt->DrawRoundedRectangle(CD2DRoundedRect(rcFrame, 2.f), &brush, .2f);
 }
 
 
@@ -496,7 +502,8 @@ void CStatVisualWnd::OnMouseMove(UINT nFlags, CPoint point)
 				{
 					CRenderTarget* prt = GetRenderTarget();
 					prt->BeginDraw();
-					DrawGraph(prt);
+					//DrawGraph(prt);
+					DrawAll(prt);
 					prt->EndDraw();
 				}
 			}
@@ -572,7 +579,8 @@ void CStatVisualWnd::UpdateLegend(void)
 	{
 		CRenderTarget* prt = GetRenderTarget();
 		prt->BeginDraw();
-		DrawGraph(prt, false);
+		//DrawGraph(prt, false);
+		DrawAll(prt);
 		prt->EndDraw();
 	}
 }

@@ -77,17 +77,9 @@ BOOL CPPMain::OnInitDialog()
 	lcMain.InsertColumn(3, _T("Today"), 0, nw);
 	lcMain.InsertColumn(4, _T("Session"), 0, nw);
 
-	LV_ITEM li;
 	lcMain.InsertItem(0, _T("Keyboard"), 0);
 	lcMain.InsertItem(1, _T(""), -1);
 	lcMain.SetItemText(1, 1, _T("Keystrokes"));
-	li.iItem = 1;
-	li.iSubItem = 1;
-	lcMain.GetItem(&li);
-	li.mask = LVIF_IMAGE;
-	li.iImage = 5;
-	lcMain.SetItem(&li);
-
 	lcMain.InsertItem(lcMain.GetItemCount(), _T("Mouse"), 1);
 	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Left click"));
@@ -97,6 +89,15 @@ BOOL CPPMain::OnInitDialog()
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Middle click"));
 	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
 	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Distance"));
+
+	LV_ITEM li;
+	li.iItem = 1;
+	li.iSubItem = 1;
+	lcMain.GetItem(&li);
+	li.mask = LVIF_IMAGE;
+	li.iImage = 5;
+	lcMain.SetItem(&li);
+
 	li.iItem = 3;
 	li.iSubItem = 1;
 	lcMain.GetItem(&li);

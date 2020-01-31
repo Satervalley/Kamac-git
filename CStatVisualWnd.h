@@ -43,7 +43,7 @@ protected:
 	BOOL PrepareD2DResource(void);
 	void DeleteD2DResource(void);
 	void GetScaledWindowSize(CSize& sz);
-	void DrawAxis(CRenderTarget* prt, float at, float top, float bottom, bool bLeft = true, float lg = 8., float sg = 4.);
+	void DrawAxis(CRenderTarget* prt, float at, float top, float bottom, bool bLeft = true, float lg = 8.f, float sg = 4.f);
 	void DrawGraph(CRenderTarget* prt, bool bDrawLabel = true);
 	void GetTextSize(CRenderTarget * prt, const CString& str,  CSize& sz);
 	void DrawTextOn(CRenderTarget* prt, const CString& str, const CRect& rc, bool bRight = false);
@@ -51,6 +51,7 @@ protected:
 	float GetColumnHeight(float nTop, float nValue, float nTotalHeight);
 	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items);
 	void UpdateLegend(void);
+	void DrawAll(CRenderTarget* prt);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

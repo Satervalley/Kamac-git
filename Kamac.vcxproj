@@ -135,7 +135,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)Unqlite\;$(ProjectDir)UnqliteWrapper\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
     </ClCompile>
@@ -147,6 +147,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <UACUIAccess>false</UACUIAccess>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)AutoVersion\BeforeBuild "$(ProjectDir)\$(ProjectName)_av" "$(ProjectDir)\$(ProjectName)_av"</Command>
