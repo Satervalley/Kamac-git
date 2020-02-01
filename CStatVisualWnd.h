@@ -29,13 +29,16 @@ protected:
 	DWORD background[nBackgroundSize * nBackgroundSize];
 	D2D1::ColorF clrBack{ 0 }, clrBorder{ 0 }, clrText{ 0 }, clrHighBorder{ 0 };
 	D2D1::ColorF clrCol1{ 0x00ff5252 }, clrCol2{ 0x0069f0ae }, clrCol3{ 0x448aff };
+	CComPtr<ID2D1StrokeStyle> ssDash;
 	CGraphMan gmGraph;
 	CRect rectGraph, rectGraphCore;	// all graph, graph core area, excluding bottom labels
 	CString strColNames[3] = {_T("Keystrokes"), _T("Mouse clicks"), _T("Distance"), };
 	CString strColValues[3];
 	Date_Key dkCurrTip{ Date_Key_NULL };
 	const CString* strCurrLegend{ strColNames };
-	UINT uiTimerID{ 1 };	// timer for column values tip
+	int nCompLines[3] = { 0, 0, 0 };
+	const int* pnCurrBaseLines{ nullptr };
+	UINT uiTimerID{ 1 };	// timer for column values tip	
 
 	BOOL bDragging{ FALSE };
 	CPoint ptLast;	// for track dragging
@@ -51,6 +54,7 @@ protected:
 	float GetColumnHeight(float nTop, float nValue, float nTotalHeight);
 	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items);
 	void UpdateLegend(void);
+	void DrawCompLines(CRenderTarget* prt);
 	void DrawAll(CRenderTarget* prt);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

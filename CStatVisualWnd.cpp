@@ -209,6 +209,7 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 		DrawDataGroup_3(prt, *it, rcf, bDrawLabel);
 	}
 	DrawLegend(prt, rcf, strCurrLegend);
+	DrawCompLines(prt);
 	prt->PopAxisAlignedClip();
 	prt->DrawRectangle(rcf, &scb);
 }
@@ -284,6 +285,17 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	clrBorder = D2D1::ColorF(::GetSysColor(COLOR_3DSHADOW));
 	clrText = D2D1::ColorF(::GetSysColor(COLOR_WINDOWTEXT));
 	clrHighBorder = D2D1::ColorF(::GetSysColor(COLOR_3DHILIGHT));
+	
+	D2D1_STROKE_STYLE_PROPERTIES ssp;
+	ssp.startCap = D2D1_CAP_STYLE_ROUND;
+	ssp.endCap = D2D1_CAP_STYLE_ROUND;
+	ssp.dashCap = D2D1_CAP_STYLE_ROUND;
+	ssp.lineJoin = D2D1_LINE_JOIN_ROUND;
+	ssp.miterLimit = 1.f;
+	ssp.dashStyle = D2D1_DASH_STYLE_CUSTOM;
+	ssp.dashOffset = 0.f;
+	float dashes[2] = { 8.f, 4.f };
+	::AfxGetD2DState()->GetDirect2dFactory()->CreateStrokeStyle(ssp, dashes, 2, &ssDash);
 	return bRes;
 }
 
@@ -553,6 +565,11 @@ void CStatVisualWnd::UpdateLegend(void)
 					strColValues[0].Format(_T("%d"), pdg->nData[0]);
 					strColValues[1].Format(_T("%d"), pdg->nData[1]);
 					strColValues[2].Format(_T("%dm"), pdg->nData[2]);
+
+					nCompLines[0] = pdg->nData[0];
+					nCompLines[1] = pdg->nData[1];
+					nCompLines[2] = pdg->nData[2];
+					pnCurrBaseLines = nCompLines;
 				}
 			}
 			else
@@ -562,6 +579,7 @@ void CStatVisualWnd::UpdateLegend(void)
 					bRedraw = true;
 					dkCurrTip = Date_Key_NULL;
 					strCurrLegend = strColNames;
+					pnCurrBaseLines = nullptr;
 				}
 			}
 		}
@@ -572,6 +590,7 @@ void CStatVisualWnd::UpdateLegend(void)
 				bRedraw = true;
 				dkCurrTip = Date_Key_NULL;
 				strCurrLegend = strColNames;
+				pnCurrBaseLines = nullptr;
 			}
 		}
 	}
@@ -582,6 +601,36 @@ void CStatVisualWnd::UpdateLegend(void)
 		//DrawGraph(prt, false);
 		DrawAll(prt);
 		prt->EndDraw();
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::DrawCompLines(CRenderTarget* prt)
+{
+	if (pnCurrBaseLines)
+	{
+		CD2DPointF pt1, pt2;
+		CD2DBrushProperties bp;
+		bp.opacity = 1.f;
+		CD2DSolidColorBrush brush(prt, /*D2D1::ColorF(D2D1::ColorF::DarkRed)*/clrCol1, &bp);
+		
+		pt1.x = rectGraphCore.left + 1.f;
+		pt1.y = rectGraphCore.bottom -
+			GetColumnHeight(float(gmGraph.GetCountTop()), float(pnCurrBaseLines[0]), float(rectGraphCore.Height()));
+		pt2.x = rectGraphCore.right - 1.f;
+		pt2.y = pt1.y;
+		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
+		pt1.y = rectGraphCore.bottom -
+			GetColumnHeight(float(gmGraph.GetCountTop()), float(pnCurrBaseLines[1]), float(rectGraphCore.Height()));
+		pt2.y = pt1.y;
+		brush.SetColor(/*D2D1::ColorF(D2D1::ColorF::DarkGreen)*/clrCol2);
+		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
+		pt1.y = rectGraphCore.bottom -
+			GetColumnHeight(float(gmGraph.GetDistanceTop()), float(pnCurrBaseLines[2]), float(rectGraphCore.Height()));
+		pt2.y = pt1.y;
+		brush.SetColor(/*D2D1::ColorF(D2D1::ColorF::DarkBlue)*/clrCol3);
+		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
 	}
 }
 
