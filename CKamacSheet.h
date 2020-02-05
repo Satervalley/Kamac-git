@@ -67,7 +67,7 @@ protected:
 	HICON m_hIcon, m_hIconSmall;
 	CPPMain* ppMain{ new CPPMain(koOptions) };
 	CPPOptions* ppOptions{ new CPPOptions(koOptions) };
-	CPPStatistics* ppStatistics{ new CPPStatistics };
+	CPPStatistics* ppStatistics{ new CPPStatistics(koOptions) };
 	CPPAbout* ppAbout{ new CPPAbout() };
 	CKMData kmdTotal, kmdToday, kmdSession;
 	CKamacOptions koOptions;
@@ -111,6 +111,7 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg HRESULT OnTrayIconNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg HRESULT OnOptionsChanged(WPARAM wParam, LPARAM lParam);
+	afx_msg HRESULT OnColorChanged(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDisplayChange(UINT nImageDepth, int cxScreen, int cyScreen);
 	

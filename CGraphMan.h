@@ -42,36 +42,13 @@ public:
 	}
 
 
-	int CalcCountTop(void)
+	bool CalcTops(void)
 	{
-		int n = 1000;
-		if (pdsMan)
-		{
-			n = (int)pdsMan->recKeyMost.kmdDay.ulKeyStrokes;
-			n = n < (int)pdsMan->recMouseMost.MouseTotal() ? (int)pdsMan->recMouseMost.MouseTotal() : n;
-			n = n / 1000 * 1000 + 1000;
-		}
-		nCountTop = n;
-		return n;
-	}
-
-	
-	int CalcDistanceTop(void)
-	{
-		int n = 1000;
-		if (pdsMan)
-		{
-			n = (int)pdsMan->recMoveMost.DistanceAsMeter();
-			n = n / 1000 * 1000 + 1000;
-		}
-		nDistanceTop = n;
-		return n;
-	}
-
-	void CalcTops(void)
-	{
-		CalcCountTop();
-		CalcDistanceTop();
+		bool bRes = false;
+		bRes = (bRes || CalcCountTop());
+		bool b = CalcDistanceTop();
+		bRes = (bRes || b);
+		return bRes;
 	}
 
 
@@ -230,11 +207,46 @@ public:
 		}
 		return pdg;
 	}
+
 protected:
 	CKamacDS_Man* pdsMan{ nullptr };
 	Date_Key dkFirst{ Date_Key_NULL }, dkLast{ Date_Key_NULL };
 	int nCountTop{ 1000 }, nDistanceTop{ 1000 };
 	CDataGroup_3_PointerList dgplData;
+
+
+	// return true: count top updated, otherwise not updated
+	bool CalcCountTop(void)
+	{
+		int n = 1000;
+		if (pdsMan)
+		{
+			n = (int)pdsMan->recKeyMost.kmdDay.ulKeyStrokes;
+			n = n < (int)pdsMan->recMouseMost.MouseTotal() ? (int)pdsMan->recMouseMost.MouseTotal() : n;
+			n = n * 12 / 10;
+			n = n / 1000 * 1000 + 1000;
+		}
+		bool bRes = (nCountTop != n);
+		nCountTop = n;
+		return bRes;
+	}
+
+
+	// return true: distance top updated, otherwise not updated
+	bool CalcDistanceTop(void)
+	{
+		int n = 500;
+		if (pdsMan)
+		{
+			n = (int)pdsMan->recMoveMost.DistanceAsMeter();
+			n = n * 12 / 10;
+			n = n / 500 * 500 + 500;
+		}
+		bool bRes = (nDistanceTop != n);
+		nDistanceTop = n;
+		return bRes;
+	}
+
 
 	size_t TranslateAndEraseInvisible(int nDiff, const CRect& rect)
 	{

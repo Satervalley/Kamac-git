@@ -11,6 +11,8 @@
 
 UINT WM_TRAYICONNOTIFY = WM_USER + 1;
 extern UINT WM_OPTIONS_CHANGED;
+extern const UINT WM_USER_COLOR_CHANGED;
+
 // CKamacSheet
 
 IMPLEMENT_DYNAMIC(CKamacSheet, CPropertySheet)
@@ -62,6 +64,7 @@ CKamacSheet::~CKamacSheet()
 {
 	delete ppMain;
 	delete ppOptions;
+	delete ppStatistics;
 	delete ppAbout;
 }
 
@@ -73,6 +76,7 @@ BEGIN_MESSAGE_MAP(CKamacSheet, CPropertySheet)
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_TRAYICONNOTIFY, &CKamacSheet::OnTrayIconNotify)
 	ON_MESSAGE(WM_OPTIONS_CHANGED, &CKamacSheet::OnOptionsChanged)
+	ON_MESSAGE(WM_USER_COLOR_CHANGED, OnColorChanged)
 	ON_WM_SIZE()
 	ON_WM_DISPLAYCHANGE()
 	ON_COMMAND(ID_TRAY_MAIN, &CKamacSheet::OnTrayMain)
@@ -348,6 +352,10 @@ void CKamacSheet::SetOptions(const CKamacOptions& ko)
 	siConfig.SetULongValue(SecName, _T("StartWithOS"), ULONG32(ko.bStartWithOS));
 	siConfig.SetULongValue(SecName, _T("MonitorSizeConfirmed"), ULONG32(ko.bMonitorSizeConfirmed));
 	siConfig.SetULongValue(SecName, _T("MonitorSize"), ko.ulMonitorSize);
+	SecName = _T("Graph");
+	siConfig.SetULongValue(SecName, _T("VolColor1"), ko.dwVolColor1);
+	siConfig.SetULongValue(SecName, _T("VolColor2"), ko.dwVolColor2);
+	siConfig.SetULongValue(SecName, _T("VolColor3"), ko.dwVolColor3);
 }
 
 
@@ -358,6 +366,10 @@ void CKamacSheet::GetOptions(CKamacOptions& ko)
 	ko.bStartWithOS = (BOOL)(siConfig.GetULongValue(SecName, _T("StartWithOS"), 0));
 	ko.bMonitorSizeConfirmed = (BOOL)(siConfig.GetULongValue(SecName, _T("MonitorSizeConfirmed"), 0));
 	ko.ulMonitorSize = siConfig.GetULongValue(SecName, _T("MonitorSize"), 3556);
+	SecName = _T("Graph");
+	ko.dwVolColor1 = siConfig.GetULongValue(SecName, _T("VolColor1"), 0xff5252);
+	ko.dwVolColor2 = siConfig.GetULongValue(SecName, _T("VolColor2"), 0xc853);
+	ko.dwVolColor3 = siConfig.GetULongValue(SecName, _T("VolColor3"), 0x448aff);
 }
 
 
@@ -378,7 +390,10 @@ void CKamacSheet::OnTimer(UINT_PTR nIDEvent)
 		n = 0;
 	}
 	if(CheckToday())
+	{
 		ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
+		ppStatistics->DayPassed();
+	}
 
 	CPropertySheet::OnTimer(nIDEvent);
 }
@@ -495,6 +510,14 @@ HRESULT CKamacSheet::OnOptionsChanged(WPARAM wParam, LPARAM lParam)
 {
 	dmDisplay.Update(koOptions.ulMonitorSize);
 	return 0;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+HRESULT CKamacSheet::OnColorChanged(WPARAM wParam, LPARAM lParam)
+{
+	SaveConfig();
+	return TRUE;
 }
 
 

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CGraphMan.h"
+#include "CColorPickingWnd.h"
+
+extern const UINT WM_USER_COLOR_CHANGED;
 
 // CStatVisualWnd
-
 class CStatVisualWnd : public CWnd
 {
 	DECLARE_DYNAMIC(CStatVisualWnd)
@@ -13,7 +15,8 @@ public:
 	virtual ~CStatVisualWnd();
 
 	void SetDS(CKamacDS_Man* pds) { gmGraph.SetDS(pds); }
-	void InitGraph(void);
+	void SetOptions(CKamacOptions* pko);
+	void InitGraph(bool bStartTimer = true);
 	void Hide(void);
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -28,17 +31,23 @@ protected:
 	CSize szMarginText, szMarginGraph, szLabelText;	// margin for text and graph and graph label text
 	DWORD background[nBackgroundSize * nBackgroundSize];
 	D2D1::ColorF clrBack{ 0 }, clrBorder{ 0 }, clrText{ 0 }, clrHighBorder{ 0 };
-	D2D1::ColorF clrCol1{ 0x00ff5252 }, clrCol2{ 0x0069f0ae }, clrCol3{ 0x448aff };
+	D2D1::ColorF clrVolColors[3] = { 0x00ff5252, 0xc853, 0x448aff };
+	D2D1::ColorF clrSaved{ 0 };	// for auto preview
 	CComPtr<ID2D1StrokeStyle> ssDash;
 	CGraphMan gmGraph;
 	CRect rectGraph, rectGraphCore;	// all graph, graph core area, excluding bottom labels
 	CString strColNames[3] = {_T("Keystrokes"), _T("Mouse clicks"), _T("Distance"), };
 	CString strColValues[3];
 	Date_Key dkCurrTip{ Date_Key_NULL };
+	int nMaxLengendStringWidth{ 1 };	// for legend show
 	const CString* strCurrLegend{ strColNames };
 	int nCompLines[3] = { 0, 0, 0 };
 	const int* pnCurrBaseLines{ nullptr };
+	CRect rectLegends[3];	// legends rects, for color selection
+	int nCurrClickedLegend{ -1 };	// for legend clicking, if legend clicked, show color selection panel
+	CColorPickingWnd cpColorPicker;
 	UINT uiTimerID{ 1 };	// timer for column values tip	
+	CKamacOptions* pkoOptions{ nullptr };
 
 	BOOL bDragging{ FALSE };
 	CPoint ptLast;	// for track dragging
@@ -56,6 +65,9 @@ protected:
 	void UpdateLegend(void);
 	void DrawCompLines(CRenderTarget* prt);
 	void DrawAll(CRenderTarget* prt);
+	int LegendClickBegin(const CPoint & pt);
+	int LegendClickEnd(const CPoint& pt);
+	BOOL CreateColorPicker(void);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -67,6 +79,8 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	afx_msg LRESULT OnHoverColor(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSelectColor(WPARAM wParam, LPARAM lParam);
 };
 
 

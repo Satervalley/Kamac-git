@@ -12,6 +12,7 @@ public:
 	BOOL bStartWithOS{ FALSE };
 	BOOL bMonitorSizeConfirmed{ FALSE };
 	ULONG32 ulMonitorSize{3556};	// of 1/10 mm
+	DWORD dwVolColor1{ 0x00ff5252 }, dwVolColor2{ 0xc853 }, dwVolColor3{ 0x448aff };
 
 	CKamacOptions& operator =(const CKamacOptions& ko)
 	{

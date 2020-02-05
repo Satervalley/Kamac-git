@@ -133,9 +133,23 @@ public:
 			bRes = LoadBasic();
 			if (!bRes)
 				Close();
+			strFileName = filename;
 		}
 		else
 			bRes = false;
+		return bRes;
+	}
+
+
+	//----------------------------------------------------------------------------------------------------------------------
+	bool Reopen(void)
+	{
+		Close();
+		bool bRes = false;
+		if (!strFileName.IsEmpty())
+		{
+			bRes = Open(strFileName);
+		}
 		return bRes;
 	}
 
@@ -175,6 +189,7 @@ public:
 	CDS_Record recMoveMost;
 	ULONG32 ulRecCount{ 0 };
 
+	CString strFileName;
 	HANDLE hFile{ INVALID_HANDLE_VALUE };
 
 protected:

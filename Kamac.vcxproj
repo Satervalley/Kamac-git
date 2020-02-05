@@ -173,6 +173,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CColorPickingWnd.h" />
     <ClInclude Include="CGraphMan.h" />
     <ClInclude Include="CKamacCmdLineInfo.h" />
     <ClInclude Include="CKamacDS.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="XNamedColors.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CColorPickingWnd.cpp" />
     <ClCompile Include="CGraphMan.cpp" />
     <ClCompile Include="CKamacCmdLineInfo.cpp" />
     <ClCompile Include="CKamacDS.cpp" />
