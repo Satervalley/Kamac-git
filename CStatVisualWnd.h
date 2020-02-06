@@ -67,7 +67,7 @@ protected:
 	void DrawAll(CRenderTarget* prt);
 	int LegendClickBegin(const CPoint & pt);
 	int LegendClickEnd(const CPoint& pt);
-	BOOL CreateColorPicker(void);
+
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

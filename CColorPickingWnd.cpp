@@ -69,7 +69,7 @@ void CColorPickingWnd::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		clrCurr = GetColor(pos.x, pos.y);
 		CDC* pDC = GetDC();
-		pDC->FillSolidRect(264, 4, 32, 128, clrCurr);
+		DrawPreview(pDC, clrCurr, false);
 		ptCurrHover = pos;
 		if (!b)
 			pTarget->SendMessage(WM_USER_HOVER_COLOR);	// restore orig color
@@ -87,6 +87,8 @@ void CColorPickingWnd::OnPaint()
 	CPaintDC dc(this); 
 	CRect rc;
 	GetClientRect(&rc);
+	ASSERT(rc == rectWin);
+
 	CBrush brush;
 	brush.Attach(::GetSysColorBrush(COLOR_3DFACE));
 	dc.FillRect(&rc, &brush);
@@ -96,36 +98,72 @@ void CColorPickingWnd::OnPaint()
 	pop = dc.SelectObject(&pen);
 	dc.Rectangle(&rc);
 	dc.SelectObject(pop);
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < nGridHeight; i++)
 	{
-		for (int j = 0; j < 32; j++)
+		for (int j = 0; j < nGridWidth; j++)
 		{
-			rc.left = 4 + j * 8;
-			rc.top = 4 + i * 8;
-			rc.right = rc.left + 8;
-			rc.bottom = rc.top + 8;
-			dc.FillSolidRect(&rc, clrColors[i * 32 + j]);
+			rc.left = rectGrid.left + j * nCellEdge + j * nGap;
+			rc.top = rectGrid.top + i * nCellEdge + i * nGap;
+			rc.right = rc.left + nCellEdge;
+			rc.bottom = rc.top + nCellEdge;
+			dc.FillSolidRect(&rc, clrColors[i * nGridWidth + j]);
 		}
 	}
-	dc.FillSolidRect(264, 4, 32, 128, clrCurr);
+	DrawPreview(&dc, clrCurr, true);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CColorPickingWnd::DrawPreview(CDC* pDC, COLORREF clr, bool bIncOld)
+{
+	ASSERT(pDC);
+
+	pDC->FillSolidRect(rectPreview.left + 1, rectPreview.top + 1, rectPreview.Width() - 2, rectPreview.Height() / 2 - 1, clr);
+	if (bIncOld)
+	{
+		pDC->FillSolidRect(rectPreview.left + 1, rectPreview.Height() / 2, rectPreview.Width() - 2, rectPreview.bottom - rectPreview.Height() / 2, clrOld);
+		CPen pen, * pop;
+		CGdiObject* pob;
+		pen.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_3DDKSHADOW));
+		pop = pDC->SelectObject(&pen);
+		pob = pDC->SelectStockObject(NULL_BRUSH);
+		pDC->Rectangle(&rectPreview);
+		pDC->SelectObject(pop);
+		pDC->SelectObject(pob);
+	}
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 void CColorPickingWnd::Init(void)
 {
-	//DWORD dwR, dwG, dwB;
-	for (int i = 0; i < 8; i++)
+	for (int n = 0; n < 2; n++)
 	{
-		for (int j = 0; j < 8; j++)
+		for (int m = 0; m < 4; m++)
 		{
-			for (int k = 0; k < 8; k++)
+			int i = n * 4 + m;
+			for (int j = 0; j < 8; j++)
 			{
-				clrColors[i * 64 + j * 8 + k] = RGB(36 * i, 36 * j, 36 * k); 
-				dwRGBs[i * 64 + j * 8 + k] = ((36 * i) << 16) | ((36 * j) << 8) | (36 * k);
+				for (int k = 0; k < 8; k++)
+				{
+					int x = m * 8 + j, y = n * 8 + k;
+					clrColors[y * 32 + x] = RGB(36 * i, 36 * j, 36 * k);
+					dwRGBs[y * 32 + x] = ((36 * i) << 16) | ((36 * j) << 8) | (36 * k);
+				}
 			}
 		}
 	}
+	//for (int i = 0; i < 8; i++)	// red
+	//{
+	//	for (int j = 0; j < 8; j++)	// green
+	//	{
+	//		for (int k = 0; k < 8; k++)	// blue
+	//		{
+	//			clrColors[i * 64 + j * 8 + k] = RGB(36 * i, 36 * j, 36 * k); 
+	//			dwRGBs[i * 64 + j * 8 + k] = ((36 * i) << 16) | ((36 * j) << 8) | (36 * k);
+	//		}
+	//	}
+	//}
 	clrCurr = ::GetSysColor(COLOR_WINDOW);
 }
 
@@ -133,10 +171,23 @@ void CColorPickingWnd::Init(void)
 //----------------------------------------------------------------------------------------------------------------------
 bool CColorPickingWnd::GetCurrColorPos(const CPoint& pt, CPoint& pos)
 {
-	pos.x = (pt.x - 4) / 8;
-	pos.y = (pt.y - 4) / 8;
-	if (pos.x >= 0 && pos.x < 32 && pos.y >= 0 && pos.y < 16)
-		return true;
+	if (rectGrid.PtInRect(pt))
+	{
+		CRect rc;
+		pos.x = (pt.x - rectGrid.left) / (nCellEdge + nGap);
+		pos.y = (pt.y - rectGrid.top) / (nCellEdge + nGap);
+		rc.left = rectGrid.left + pos.x * (nCellEdge + nGap);
+		rc.right = rc.left + nCellEdge;
+		rc.top = rectGrid.top + pos.y * (nCellEdge + nGap);
+		rc.bottom = rc.top + nCellEdge;
+		if (rc.PtInRect(pt))
+			return true;
+		else
+		{
+			pos.x = pos.y = -1;
+			return false;
+		}
+	}
 	else
 	{
 		pos.x = pos.y = -1;
@@ -175,3 +226,39 @@ void CColorPickingWnd::OnKillFocus(CWnd* pNewWnd)
 	}
 	bSelected = false;
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+BOOL CColorPickingWnd::Create(void)
+{
+	if (::IsWindow(m_hWnd))
+		return TRUE;
+	CRect rect(0, 0, 300, 40);
+	BOOL b = CreateEx(WS_EX_WINDOWEDGE,
+		::AfxRegisterWndClass(CS_OWNDC | CS_DROPSHADOW | CS_HREDRAW | CS_VREDRAW), nullptr, WS_POPUP, rect, this, 0);
+	if (b)
+		Init();
+	return b;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+BOOL CColorPickingWnd::ShowAt(const CPoint& pt, COLORREF clr)
+{
+	if (Create())
+	{
+		clrOld = clr;
+		clrCurr = ::GetSysColor(COLOR_WINDOW);
+		ptCurrHover = { -1, -1 };
+		ptCurrSelect = { -1, -1 };
+		bSelected = false;
+		MoveWindow(pt.x, pt.y - rectWin.Height(), rectWin.Width(), rectWin.Height(), FALSE);
+		AnimateWindow(200, AW_ACTIVATE | AW_BLEND);
+		Invalidate();
+		UpdateWindow();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+

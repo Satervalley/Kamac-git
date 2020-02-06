@@ -510,22 +510,31 @@ void CStatVisualWnd::OnLButtonDown(UINT nFlags, CPoint point)
 //----------------------------------------------------------------------------------------------------------------------
 void CStatVisualWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
+#define MAKE_COLORREF(dw) RGB((((dw) & 0x00ff0000) >> 16), (((dw) & 0x0000ff00) >> 8), ((dw) & 0x000000ff))
+
 	bDragging = false;
 	ReleaseCapture();
 
 	if (LegendClickEnd(point) >= 0)	// show color selection panel
 	{
-		if (CreateColorPicker())
+		clrSaved = clrVolColors[nCurrClickedLegend];
+		COLORREF clr{ 0 };
+		switch (nCurrClickedLegend)
 		{
-			clrSaved = clrVolColors[nCurrClickedLegend];
-
-			ClientToScreen(&point);
-			int w = 32 * 8 + 4 * 3 + 32, h = 16 * 8 + 8;
-			cpColorPicker.MoveWindow(point.x, point.y - h, w, h, FALSE);
-			cpColorPicker.AnimateWindow(200, AW_ACTIVATE | AW_BLEND);
-			cpColorPicker.Invalidate();
-			cpColorPicker.UpdateWindow();
+		case 0:
+			clr = MAKE_COLORREF(pkoOptions->dwVolColor1);
+			break;
+		case 1:
+			clr = MAKE_COLORREF(pkoOptions->dwVolColor2);
+			break;
+		case 2:
+			clr = MAKE_COLORREF(pkoOptions->dwVolColor3);
+			break;
+		default:
+			break;
 		}
+		ClientToScreen(&point);
+		cpColorPicker.ShowAt(point, clr);
 	}
 	CWnd::OnLButtonUp(nFlags, point);
 }
@@ -717,20 +726,6 @@ int CStatVisualWnd::LegendClickEnd(const CPoint& pt)
 	if (nf != nCurrClickedLegend)
 		nCurrClickedLegend = -1;
 	return nCurrClickedLegend;
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-BOOL CStatVisualWnd::CreateColorPicker(void)
-{
-	if (::IsWindow(cpColorPicker.m_hWnd))
-		return TRUE;
-	CRect rect(0, 0, 300, 40);
-	BOOL b = cpColorPicker.CreateEx(WS_EX_WINDOWEDGE, 
-		::AfxRegisterWndClass(CS_OWNDC | CS_DROPSHADOW | CS_HREDRAW | CS_VREDRAW), nullptr, WS_POPUP, rect, this, 0);
-	if (b)
-		cpColorPicker.Init();
-	return b;
 }
 
 

@@ -76,20 +76,25 @@ BOOL CPPMain::OnInitDialog()
 	lcMain.InsertColumn(2, _T("Total"), 0, nw);
 	lcMain.InsertColumn(3, _T("Today"), 0, nw);
 	lcMain.InsertColumn(4, _T("Session"), 0, nw);
+	try
+	{
+		lcMain.InsertItem(0, _T("Keyboard"), 0);
+		lcMain.InsertItem(1, _T(""), -1);
+		lcMain.SetItemText(1, 1, _T("Keystrokes"));
+		lcMain.InsertItem(lcMain.GetItemCount(), _T("Mouse"), 1);
+		lcMain.InsertItem(lcMain.GetItemCount(), nullptr, -1);
+		lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Left click"));
+		lcMain.InsertItem(lcMain.GetItemCount(), nullptr, -1);
+		lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Right click"));
+		lcMain.InsertItem(lcMain.GetItemCount(), nullptr, -1);
+		lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Middle click"));
+		lcMain.InsertItem(lcMain.GetItemCount(), nullptr, -1);
+		lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Distance"));
+	}
+	catch (...)
+	{
 
-	lcMain.InsertItem(0, _T("Keyboard"), 0);
-	lcMain.InsertItem(1, _T(""), -1);
-	lcMain.SetItemText(1, 1, _T("Keystrokes"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T("Mouse"), 1);
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
-	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Left click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
-	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Right click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
-	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Middle click"));
-	lcMain.InsertItem(lcMain.GetItemCount(), _T(""), -1);
-	lcMain.SetItemText(lcMain.GetItemCount() - 1, 1, _T("Distance"));
-
+	}
 	LV_ITEM li;
 	li.iItem = 1;
 	li.iSubItem = 1;
@@ -123,18 +128,9 @@ BOOL CPPMain::OnInitDialog()
 	li.iImage = 6;
 	lcMain.SetItem(&li);
 
-//	::SetWindowLongPtr(statInfo, GWL_EXSTYLE, statInfo.GetExStyle() | WS_EX_COMPOSITED);
 	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
 	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
 
-	//strScreenSize.Format(_T("Screen size:\t%umm\r\n"), (koOptions.ulMonitorSize + 5) / 10); 
-	//strResolution.Format( _T("Resolution:\t%d x %d\r\n"), nsw, nsh);
-	//strKeyboard.Format(_T("Last key:\t0x%02X\r\n"), 0);
-	//UpdateMousePos();
-	//strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
-
-	//statInfo.SetContent(strInfo);
-	//	statInfo.SetWindowText(strInfo);
 	statInfo.UpdateScreenSize((koOptions.ulMonitorSize + 5) / 10, FALSE);
 	statInfo.UpdateResolution(nsw, nsh, FALSE);
 	statInfo.UpdateLastKey(0, FALSE);
@@ -149,35 +145,6 @@ BOOL CPPMain::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }
-
-
-//----------------------------------------------------------------------------------------------------------------------
-//void CPPMain::UpdateInfo(void)
-//{
-//	int nsw = ::GetSystemMetrics(SM_CXSCREEN);
-//	int nsh = ::GetSystemMetrics(SM_CYSCREEN);
-//	strScreenSize.Format(_T("Screen size:\t\t%umm\r\n"), (koOptions.ulMonitorSize + 5) / 10);
-//	strResolution.Format(_T("Resolution:\t\t%d x %d\r\n"), nsw, nsh);
-//	strInfo.Format(_T("%s%s%s%s"), (LPCTSTR)strScreenSize, (LPCTSTR)strResolution, (LPCTSTR)strKeyboard, (LPCTSTR)strMouse);
-//	statInfo.SetContent(strInfo);
-//}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-//void CPPMain::UpdateMousePos(void)
-//{
-//	CPoint pt;
-//	::GetCursorPos(&pt);
-//
-//	UpdateMousePos(pt.x, pt.y);
-//}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-//void CPPMain::UpdateMousePos(int cx, int cy)
-//{
-//	strMouse.Format(_T("Mouse pointer:\t%d  %d"), cx, cy);
-//}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -201,12 +168,8 @@ void CPPMain::UpdateMouseRightClick(ULONG32 ulLCSession, ULONG32 ulLCToday, ULON
 //----------------------------------------------------------------------------------------------------------------------
 void CPPMain::UpdateMouseMiddleClick(ULONG32 ulLCSession, ULONG32 ulLCToday, ULONG32 ulLCTotal)
 {
-//	CString str;
-//	str.Format(_T("%u"), ulLCTotal);
 	lcMain.SetItemText(5, 2, CUtil::uitoa(ulLCTotal));
-//	str.Format(_T("%u"), ulLCToday);
 	lcMain.SetItemText(5, 3, CUtil::uitoa(ulLCToday));
-//	str.Format(_T("%u"), ulLCSession);
 	lcMain.SetItemText(5, 4, CUtil::uitoa(ulLCSession));
 }
 
