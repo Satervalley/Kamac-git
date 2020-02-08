@@ -20,6 +20,7 @@ CColorPickingWnd::CColorPickingWnd(CWnd* ptw)
 
 CColorPickingWnd::~CColorPickingWnd()
 {
+
 }
 
 
@@ -29,6 +30,7 @@ BEGIN_MESSAGE_MAP(CColorPickingWnd, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_PAINT()
 	ON_WM_KILLFOCUS()
+	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 
@@ -37,6 +39,7 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------------------------
 void CColorPickingWnd::OnLButtonDown(UINT nFlags, CPoint point)
 {
+
 	GetCurrColorPos(point, ptCurrSelect);
 
 	CWnd::OnLButtonDown(nFlags, point);
@@ -89,15 +92,23 @@ void CColorPickingWnd::OnPaint()
 	GetClientRect(&rc);
 	ASSERT(rc == rectWin);
 
-	CBrush brush;
-	brush.Attach(::GetSysColorBrush(COLOR_3DFACE));
-	dc.FillRect(&rc, &brush);
-	brush.Detach();
-	CPen pen, *pop;
-	pen.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_WINDOWFRAME));
-	pop = dc.SelectObject(&pen);
-	dc.Rectangle(&rc);
-	dc.SelectObject(pop);
+	CBrush brFrame(::GetSysColor(COLOR_ACTIVEBORDER)), brFill(::GetSysColor(COLOR_INFOBK));
+	dc.FillRect(&rc, &brFill);
+	BOOL b = dc.FrameRgn(&rgnCopy, &brFrame, 1, 1);
+	
+	//CBrush brush;
+	//brush.Attach(::GetSysColorBrush(COLOR_INFOBK));
+	////dc.FillRect(&rc, &brush);
+	//dc.FillRgn(&rgnWnd, &brush);
+	//brush.Detach();
+	//brush.Attach(::GetSysColorBrush(COLOR_ACTIVEBORDER));
+	//dc.FrameRgn(&rgnWnd, &brush, 1, 1);
+	//brush.Detach();
+	//CPen pen, *pop;
+	//pen.CreatePen(PS_SOLID, 1, ::GetSysColor(COLOR_WINDOWFRAME));
+	//pop = dc.SelectObject(&pen);
+	//dc.Rectangle(&rc);
+	//dc.SelectObject(pop);
 	for (int i = 0; i < nGridHeight; i++)
 	{
 		for (int j = 0; j < nGridWidth; j++)
@@ -146,7 +157,15 @@ void CColorPickingWnd::Init(void)
 			{
 				for (int k = 0; k < 8; k++)
 				{
-					int x = m * 8 + j, y = n * 8 + k;
+					int x, y;;
+					if (m % 2)
+						x = (m + 1) * 8 - 1 - j;
+					else
+						x = m * 8 + j;
+					if (n % 2)
+						y = (n + 1) * 8 - 1 - k;
+					else
+						y = n * 8 + k;
 					clrColors[y * 32 + x] = RGB(36 * i, 36 * j, 36 * k);
 					dwRGBs[y * 32 + x] = ((36 * i) << 16) | ((36 * j) << 8) | (36 * k);
 				}
@@ -165,6 +184,17 @@ void CColorPickingWnd::Init(void)
 	//	}
 	//}
 	clrCurr = ::GetSysColor(COLOR_WINDOW);
+
+	rgnWnd.CreateRectRgn(0, 0, rectWin.Width(), rectWin.Height());
+	rgnCopy.CreateRectRgn(0, 0, rectWin.Width(), rectWin.Height());
+	int x = rectWin.Width() / 3, y = rectWin.Height();
+	CPoint pts[3] = { {x, y}, {x + nTriWidth, y}, {x, y + nTriHeigh} };
+	CRgn rgn;
+	rgn.CreatePolygonRgn(pts, 3, ALTERNATE);
+	int nRes = rgnWnd.CombineRgn(&rgnWnd, &rgn, RGN_OR);
+	nRes = rgnCopy.CombineRgn(&rgnCopy, &rgn, RGN_OR);
+	rectWin.bottom += nTriHeigh;
+	SetWindowRgn(rgnWnd, FALSE);
 }
 
 
@@ -234,8 +264,8 @@ BOOL CColorPickingWnd::Create(void)
 	if (::IsWindow(m_hWnd))
 		return TRUE;
 	CRect rect(0, 0, 300, 40);
-	BOOL b = CreateEx(WS_EX_WINDOWEDGE,
-		::AfxRegisterWndClass(CS_OWNDC | CS_DROPSHADOW | CS_HREDRAW | CS_VREDRAW), nullptr, WS_POPUP, rect, this, 0);
+	BOOL b = CreateEx(WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW,
+		::AfxRegisterWndClass(CS_OWNDC | CS_DROPSHADOW | CS_HREDRAW | CS_VREDRAW), nullptr, WS_POPUP | WS_EX_TOOLWINDOW/*WS_CHILD*/, rect, this, 0);
 	if (b)
 		Init();
 	return b;
@@ -252,13 +282,32 @@ BOOL CColorPickingWnd::ShowAt(const CPoint& pt, COLORREF clr)
 		ptCurrHover = { -1, -1 };
 		ptCurrSelect = { -1, -1 };
 		bSelected = false;
-		MoveWindow(pt.x, pt.y - rectWin.Height(), rectWin.Width(), rectWin.Height(), FALSE);
+
+		CWnd* ptp = pTarget->GetParentOwner();
+		ptp->SetRedraw(FALSE);
+
+		MoveWindow(pt.x - rectWin.Width() / 3, pt.y - rectWin.Height(), rectWin.Width(), rectWin.Height(), FALSE);
+		//ShowWindow(SW_SHOWNOACTIVATE);
+		//SetCapture();
 		AnimateWindow(200, AW_ACTIVATE | AW_BLEND);
-		Invalidate();
-		UpdateWindow();
+		//Invalidate();
+		//UpdateWindow();
+
+//		SetFocus();
+
+		ptp->SendMessage(WM_NCACTIVATE, TRUE);
+		ptp->SetRedraw(TRUE);
+
 		return TRUE;
 	}
 	return FALSE;
 }
 
 
+//----------------------------------------------------------------------------------------------------------------------
+void CColorPickingWnd::OnCaptureChanged(CWnd* pWnd)
+{
+	// TODO: 在此处添加消息处理程序代码
+
+	CWnd::OnCaptureChanged(pWnd);
+}

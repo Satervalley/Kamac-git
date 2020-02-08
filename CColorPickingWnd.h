@@ -23,6 +23,8 @@ protected:
 protected:
 	COLORREF clrOld;
 	const int nMargin{ 4 }, nGap{ 1 }, nCellEdge{ 8 }, nGridWidth{ 32 }, nGridHeight{ 16 }, nPreviewWidth{ 32 };
+	const int nTriWidth{ 12 }, nTriHeigh{ 12 };
+	CRgn rgnWnd, rgnCopy;
 	CRect rectGrid{ nMargin, nMargin, nMargin + nGridWidth * nCellEdge + nGap * (nGridWidth - 1), nMargin + nGridHeight * nCellEdge + nGap * (nGridHeight - 1) };
 	CRect rectPreview{ rectGrid.right + nMargin, nMargin, rectGrid.right + nMargin + nPreviewWidth, rectGrid.bottom };
 	CRect rectWin{ 0, 0, rectPreview.right + nMargin, rectPreview.bottom + nMargin};
@@ -45,6 +47,8 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnPaint();
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+public:
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 };
 
 
