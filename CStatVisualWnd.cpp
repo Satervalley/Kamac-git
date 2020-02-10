@@ -123,6 +123,7 @@ void CStatVisualWnd::DrawAll(CRenderTarget* prt)
 LRESULT CStatVisualWnd::OnDraw2D(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRender = (CHwndRenderTarget*)lParam;
+	pRender->SetDpi(CD2DSizeF(96.f, 96.f));
 	DrawAll(pRender);
 	return 0;
 }
@@ -210,12 +211,12 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 		prt->FillRectangle(rcLabelAll, &brushLabelAll);
 	}
 	prt->PushAxisAlignedClip(rcClip);
+	DrawCompLines(prt);
 	for (auto it = gmGraph.GetDataGroups().begin(); it != gmGraph.GetDataGroups().end(); it++)
 	{
 		DrawDataGroup_3(prt, *it, rcf, bDrawLabel);
 	}
 	DrawLegend(prt, rcf, strCurrLegend);
-	DrawCompLines(prt);
 	prt->PopAxisAlignedClip();
 	prt->DrawRectangle(rcf, &scb);
 }
@@ -554,6 +555,7 @@ void CStatVisualWnd::OnMouseMove(UINT nFlags, CPoint point)
 				if (gmGraph.UpdateDrag(dis, rectGraphCore))
 				{
 					CRenderTarget* prt = GetRenderTarget();
+					prt->SetDpi(CD2DSizeF(96.f, 96.f));
 					prt->BeginDraw();
 					//DrawGraph(prt);
 					DrawAll(prt);
@@ -638,6 +640,7 @@ void CStatVisualWnd::UpdateLegend(void)
 	if (bRedraw)
 	{
 		CRenderTarget* prt = GetRenderTarget();
+		prt->SetDpi(CD2DSizeF(96.f, 96.f));
 		prt->BeginDraw();
 		//DrawGraph(prt, false);
 		DrawAll(prt);
@@ -741,6 +744,7 @@ LRESULT CStatVisualWnd::OnHoverColor(WPARAM wParam, LPARAM lParam)
 		clrVolColors[nCurrClickedLegend] = clrSaved;
 	}
 	CRenderTarget* prt = GetRenderTarget();
+	prt->SetDpi(CD2DSizeF(96.f, 96.f));
 	prt->BeginDraw();
 	DrawAll(prt);
 	prt->EndDraw();
