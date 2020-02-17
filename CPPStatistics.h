@@ -29,7 +29,7 @@ protected:
 	CKamacOptions& koOPtions; 
 	CStatVisualWnd svStatVisual;
 	CXHTMLStatic htmlInfo;
-	CString strHtml, strViewChart, strError;
+	CString strHtml, strViewChart, strError, strNavigation;
 	CString strHisFileName;
 	CKamacDS_Man dsMan;
 	bool bGraphShowed{ false };
@@ -42,7 +42,17 @@ protected:
 		_T("the most activity is on <font color=\"#aa00ff\">%s</font>, <font color=\"#aa00ff\">%d</font> keyboard and mouse activities; ")
 		_T("the longest moving is on <font color=\"%s\">%s</font>, <font color=\"%s\">%dm</font>.<br>")
 	};
-	const TCHAR* htmlViewChart = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>View Chart</u></font></b></a>");
+	const TCHAR* htmlShowGraph = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>Show Graph</u></font></b></a>");
+	const TCHAR* htmlNavigation = { 
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> ∣← </font></a>&nbsp;&nbsp;") 
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> ← </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
+		_T("&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
+		_T("&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> → </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> →∣ </font></a>&nbsp;&nbsp;")
+	};
+
 	const TCHAR* htmlError = _T("<center><font color=\"red\" size=\"+6\">Error: %s!</font></center>");
 
 	void MakeInfoString(CKamacDS_Man & dsMan, BOOL bChartShowed);
@@ -53,7 +63,7 @@ public:
 	void DayPassed(void);
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg LRESULT OnUserViewChart(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserShowGraph(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnColorChanged(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();

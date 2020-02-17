@@ -39,7 +39,7 @@ void CPPStatistics::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPPStatistics, CPropertyPage)
 	ON_WM_SIZE()
-	ON_MESSAGE(WM_USER_VIEW_CHART, &CPPStatistics::OnUserViewChart)
+	ON_MESSAGE(WM_USER_VIEW_CHART, &CPPStatistics::OnUserShowGraph)
 	ON_MESSAGE(WM_USER_COLOR_CHANGED, OnColorChanged)
 END_MESSAGE_MAP()
 
@@ -92,7 +92,7 @@ void CPPStatistics::OnSize(UINT nType, int cx, int cy)
 
 
 //----------------------------------------------------------------------------------------------------------------------
-afx_msg LRESULT CPPStatistics::OnUserViewChart(WPARAM wParam, LPARAM lParam)
+afx_msg LRESULT CPPStatistics::OnUserShowGraph(WPARAM wParam, LPARAM lParam)
 {
 	MakeInfoString(dsMan, TRUE);
 	htmlInfo.SetWindowText(strHtml);
@@ -119,8 +119,11 @@ void CPPStatistics::MakeInfoString(CKamacDS_Man& dsMan, BOOL bChartShowed)
 		strColor2, MakeDateString(dsMan.recMouseMost.dkDate), strColor2, dsMan.recMouseMost.MouseTotal(),
 		MakeDateString(dsMan.recActivityMost.dkDate), dsMan.recActivityMost.ActivityTotal(),
 		strColor3, MakeDateString(dsMan.recMoveMost.dkDate), strColor3, (dsMan.recMoveMost.kmdDay.ullDistance + 5000) / 10000);
+	strNavigation.Format(htmlNavigation, strColor1, strColor2, strColor3);
 	if (!bChartShowed)
-		strHtml += htmlViewChart;
+		strHtml += htmlShowGraph;
+	else
+		strHtml += strNavigation;
 }
 
 

@@ -5,6 +5,7 @@
 //#include <memory>
 #include "Kamac.h"
 #include "CStatVisualWnd.h"
+#include "Color.h"
 
 //extern const UINT WM_USER_HOVER_COLOR;
 //extern const UINT WM_USER_SELECT_COLOR;
@@ -214,9 +215,9 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 	DrawCompLines(prt);
 	for (auto it = gmGraph.GetDataGroups().begin(); it != gmGraph.GetDataGroups().end(); it++)
 	{
-		DrawDataGroup_3(prt, *it, rcf, bDrawLabel);
+		DrawDataGroup_3(prt, *it, rcf, bDrawLabel, dkCurrTip == (*it)->dkDate);
 	}
-	DrawLegend(prt, rcf, strCurrLegend);
+	DrawLegend(prt, rcf, strCurrLegend, dkCurrTip != Date_Key_NULL);
 	prt->PopAxisAlignedClip();
 	prt->DrawRectangle(rcf, &scb);
 }
@@ -264,7 +265,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 		}
 	}
 	bmpBackground.CreateBitmap(nBackgroundSize, nBackgroundSize, 1, 32, background);
-	pbmpBackground = new CD2DBitmap(prt, bmpBackground);
+	pbmpBackground = new CD2DBitmap(prt, bmpBackground, CD2DSizeU(0, 0), FALSE);	// notice: not auto destroy
 	//pbmpBackground->CopyFromMemory(background, nBackgroundSize * sizeof(DWORD));
 	D2D1_BITMAP_BRUSH_PROPERTIES bbp;
 	CD2DBrushProperties bp;
@@ -274,7 +275,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	
 	bp.opacity = 1.;
 	bp.transform = D2D1::Matrix3x2F::Translation(-8., -8.);
-	pbbBrush = new CD2DBitmapBrush(prt, &bbp);
+	pbbBrush = new CD2DBitmapBrush(prt, &bbp, nullptr, FALSE);	// notice: not auto destroy
 	pbbBrush->SetBitmap(pbmpBackground);
 
 	NONCLIENTMETRICS ncm;
@@ -291,7 +292,8 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	clrBack = D2D1::ColorF(::GetSysColor(COLOR_WINDOW));
 	clrBorder = D2D1::ColorF(::GetSysColor(COLOR_3DSHADOW));
 	clrText = D2D1::ColorF(::GetSysColor(COLOR_WINDOWTEXT));
-	clrHighBorder = D2D1::ColorF(::GetSysColor(COLOR_3DHILIGHT));
+	clrVolBorder = D2D1::ColorF(::GetSysColor(COLOR_3DHILIGHT));
+	clrVolBorderHi = D2D1::ColorF(::GetSysColor(COLOR_3DDKSHADOW));
 	
 	D2D1_STROKE_STYLE_PROPERTIES ssp;
 	ssp.startCap = D2D1_CAP_STYLE_ROUND;
@@ -312,11 +314,13 @@ void CStatVisualWnd::DeleteD2DResource(void)
 {
 	if (pbbBrush)
 	{
+		pbbBrush->Destroy();
 		delete pbbBrush;
 		pbbBrush = nullptr;
 	}
 	if (pbmpBackground)
 	{
+		pbmpBackground->Destroy();
 		delete pbmpBackground;
 		pbmpBackground = nullptr;
 	}
@@ -369,12 +373,12 @@ void CStatVisualWnd::InitGraph(bool bStartTimer)
 	gmGraph.Init(rectGraphCore);
 	bDragging = FALSE;
 	if(bStartTimer)
-		SetTimer(uiTimerID, 1000, nullptr);
+		SetTimer(uiTimerID, 400, nullptr);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel)
+void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel, bool bHilight)
 {
 	ASSERT(prt);
 
@@ -382,8 +386,7 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 	{
 		int nth = rc.Height();
 		CD2DRectF rect(rc);
-		//D2D1::ColorF clrs[3]{ clrCol1, clrCol2, clrCol3 };
-		CD2DSolidColorBrush brushBorder(prt, clrHighBorder);
+		CD2DSolidColorBrush brushBorder(prt, bHilight? clrVolBorderHi : clrVolBorder);
 		for (int i = 0; i < 3; i++)
 		{
 			rect.bottom = (float)rc.bottom;
@@ -395,7 +398,7 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 				rect.top = rect.bottom - GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth) - 1.f;
 			if (rect.left > (float)rc.right || rect.right < (float)rc.left)
 				continue;
-			CD2DSolidColorBrush brushColumn(prt, clrVolColors[i]);
+			CD2DSolidColorBrush brushColumn(prt, bHilight? clrVolColorsHi[i] : clrVolColors[i]);
 			prt->DrawRectangle(rect, &brushBorder);
 			rect.left += .5f;
 			rect.right -= .5f;
@@ -426,7 +429,7 @@ float CStatVisualWnd::GetColumnHeight(float nTop, float nValue, float nTotalHeig
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items)
+void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight)
 {
 	rectLegends[0] = rectLegends[1] = rectLegends[2] = CRect(0, 0, 0, 0);
 	if (!items)
@@ -453,8 +456,8 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	CD2DRectF rcBorder(rc.left + 6.f, rc.top + 6.f, rc.left + 6.f + fside, rc.top + 6.f + fside);
 	CD2DRectF rcFill(rcBorder.left + .5f, rcBorder.top + .5f, rcBorder.right - .5f, rcBorder.bottom - .5f);
 
-	CD2DSolidColorBrush brushBorder(prt, clrHighBorder);
-	CD2DSolidColorBrush brushFill(prt, clrVolColors[0]);
+	CD2DSolidColorBrush brushBorder(prt, bHilight? clrVolBorderHi : clrVolBorder);
+	CD2DSolidColorBrush brushFill(prt, bHilight? clrVolColorsHi[0] : clrVolColors[0]);
 	CD2DSolidColorBrush brushText(prt, clrText);
 	CD2DPointF pt(rcBorder.right + 4.f, rcBorder.top - 2.f);
 	prt->DrawRectangle(rcBorder, &brushBorder);
@@ -466,7 +469,7 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	rcBorder.right += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.left += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.right += (12.f + nMaxLengendStringWidth + fside);
-	brushFill.SetColor(clrVolColors[1]);
+	brushFill.SetColor(bHilight ? clrVolColorsHi[1] : clrVolColors[1]);
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
 	pt.x = rcBorder.right + 4.f;
@@ -479,7 +482,7 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	rcBorder.right += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.left += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.right += (12.f + nMaxLengendStringWidth + fside);
-	brushFill.SetColor(clrVolColors[2]);
+	brushFill.SetColor(bHilight ? clrVolColorsHi[2] : clrVolColors[2]);
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
 	pt.x = rcBorder.right + 4.f;
@@ -487,6 +490,14 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	//tlDistance.Get()->GetMetrics(&dtm);
 	rectLegends[2].left = int(rcBorder.left - 2.f);
 	rectLegends[2].right = int(pt.x + sz[2].cx);
+
+	if (!items[3].IsEmpty())
+	{
+		pt.x = rcBorder.right + 4.f + nMaxLengendStringWidth + 4.f;
+		CD2DTextFormat tfInfo(prt, strFontName, fFontSize);
+		CD2DTextLayout tlInfo(prt, items[3], tfInfo, CD2DSizeF(200.f, 100.f));
+		prt->DrawTextLayout(pt, &tlInfo, &brushText);
+	}
 }
 
 
@@ -519,6 +530,7 @@ void CStatVisualWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	if (LegendClickEnd(point) >= 0)	// show color selection panel
 	{
 		clrSaved = clrVolColors[nCurrClickedLegend];
+		clrSavedHi = clrVolColorsHi[nCurrClickedLegend];
 		COLORREF clr{ 0 };
 		switch (nCurrClickedLegend)
 		{
@@ -608,6 +620,7 @@ void CStatVisualWnd::UpdateLegend(void)
 					strColValues[0].Format(_T("%d"), pdg->nData[0]);
 					strColValues[1].Format(_T("%d"), pdg->nData[1]);
 					strColValues[2].Format(_T("%dm"), pdg->nData[2]);
+					strColValues[3] = MakeDateString(dkCurrTip);
 
 					nCompLines[0] = pdg->nData[0];
 					nCompLines[1] = pdg->nData[1];
@@ -738,10 +751,12 @@ LRESULT CStatVisualWnd::OnHoverColor(WPARAM wParam, LPARAM lParam)
 	if (wParam)	// hover on a color
 	{
 		clrVolColors[nCurrClickedLegend] = D2D1::ColorF(COLORREF(lParam));
+		clrVolColorsHi[nCurrClickedLegend] = MakeHiColor2(COLORREF(lParam));
 	}
 	else
 	{
 		clrVolColors[nCurrClickedLegend] = clrSaved;
+		clrVolColorsHi[nCurrClickedLegend] = clrSavedHi;
 	}
 	CRenderTarget* prt = GetRenderTarget();
 	prt->SetDpi(CD2DSizeF(96.f, 96.f));
@@ -792,7 +807,37 @@ void CStatVisualWnd::SetOptions(CKamacOptions* pko)
 		clrVolColors[0] = D2D1::ColorF(pkoOptions->dwVolColor1);
 		clrVolColors[1] = D2D1::ColorF(pkoOptions->dwVolColor2);
 		clrVolColors[2] = D2D1::ColorF(pkoOptions->dwVolColor3);
+		clrVolColorsHi[0] = MakeHiColor2(pkoOptions->dwVolColor1);
+		clrVolColorsHi[1] = MakeHiColor2(pkoOptions->dwVolColor2);
+		clrVolColorsHi[2] = MakeHiColor2(pkoOptions->dwVolColor3);
 	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+COLORREF CStatVisualWnd::MakeHiColor(COLORREF clr)
+{
+	float fa = 0.08f;
+	float s, s2, v, v2;
+	CColor color(clr);
+	s = color.GetSaturation();
+	s2 = s + fa;
+	if (s2 > 1.0f)
+		s2 = 1.0f;
+	v = color.GetLuminance();
+	v2 = v + fa;
+	if (v2 > 1.0f)
+		v2 = v - fa;
+	color.SetLuminance(v2);
+	color.SetSaturation(s2);
+	return COLORREF(color);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+D2D1::ColorF CStatVisualWnd::MakeHiColor2(COLORREF clr)
+{
+	return D2D1::ColorF(MakeHiColor(clr));
 }
 
 

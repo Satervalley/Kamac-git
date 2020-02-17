@@ -181,6 +181,7 @@
     <ClInclude Include="CKamacSheet.h" />
     <ClInclude Include="CKMData.h" />
     <ClInclude Include="CNFStatic.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="CPPAbout.h" />
     <ClInclude Include="CPPMain.h" />
     <ClInclude Include="CPPOptions.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="CKamacDS.cpp" />
     <ClCompile Include="CKamacSheet.cpp" />
     <ClCompile Include="CNFStatic.cpp" />
+    <ClCompile Include="Color.cpp" />
     <ClCompile Include="CPPAbout.cpp" />
     <ClCompile Include="CPPMain.cpp" />
     <ClCompile Include="CPPOptions.cpp" />

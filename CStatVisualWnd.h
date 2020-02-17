@@ -30,14 +30,15 @@ protected:
 	float fFontSize{ 12. };
 	CSize szMarginText, szMarginGraph, szLabelText;	// margin for text and graph and graph label text
 	DWORD background[nBackgroundSize * nBackgroundSize];
-	D2D1::ColorF clrBack{ 0 }, clrBorder{ 0 }, clrText{ 0 }, clrHighBorder{ 0 };
+	D2D1::ColorF clrBack{ 0 }, clrBorder{ 0 }, clrText{ 0 }, clrVolBorder{ 0 }, clrVolBorderHi{ 0 };
 	D2D1::ColorF clrVolColors[3] = { 0x00ff5252, 0xc853, 0x448aff };
-	D2D1::ColorF clrSaved{ 0 };	// for auto preview
+	D2D1::ColorF clrVolColorsHi[3] = {MakeHiColor(0x00ff5252), MakeHiColor(0xc853), MakeHiColor(0x448aff) };
+	D2D1::ColorF clrSaved{ 0 }, clrSavedHi{ 0 };	// for auto preview
 	CComPtr<ID2D1StrokeStyle> ssDash;
 	CGraphMan gmGraph;
 	CRect rectGraph, rectGraphCore;	// all graph, graph core area, excluding bottom labels
-	CString strColNames[3] = {_T("Keystrokes"), _T("Mouse clicks"), _T("Distance"), };
-	CString strColValues[3];
+	CString strColNames[4] = {_T("Keystrokes"), _T("Mouse clicks"), _T("Distance"), _T("")};
+	CString strColValues[4];
 	Date_Key dkCurrTip{ Date_Key_NULL };
 	int nMaxLengendStringWidth{ 1 };	// for legend show
 	const CString* strCurrLegend{ strColNames };
@@ -59,15 +60,16 @@ protected:
 	void DrawGraph(CRenderTarget* prt, bool bDrawLabel = true);
 	void GetTextSize(CRenderTarget * prt, const CString& str,  CSize& sz);
 	void DrawTextOn(CRenderTarget* prt, const CString& str, const CRect& rc, bool bRight = false);
-	void DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true);
+	void DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true, bool bHilight = false);
 	float GetColumnHeight(float nTop, float nValue, float nTotalHeight);
-	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items);
+	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight = false);
 	void UpdateLegend(void);
 	void DrawCompLines(CRenderTarget* prt);
 	void DrawAll(CRenderTarget* prt);
 	int LegendClickBegin(const CPoint & pt);
 	int LegendClickEnd(const CPoint& pt);
-
+	static COLORREF MakeHiColor(COLORREF clr);
+	static D2D1::ColorF MakeHiColor2(COLORREF clr);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
