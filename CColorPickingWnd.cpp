@@ -109,6 +109,9 @@ void CColorPickingWnd::OnPaint()
 	//pop = dc.SelectObject(&pen);
 	//dc.Rectangle(&rc);
 	//dc.SelectObject(pop);
+	CPoint pt(2, 2);
+	CBrush* pob;
+	CPen* pop;
 	for (int i = 0; i < nGridHeight; i++)
 	{
 		for (int j = 0; j < nGridWidth; j++)
@@ -117,7 +120,14 @@ void CColorPickingWnd::OnPaint()
 			rc.top = rectGrid.top + i * nCellEdge + i * nGap;
 			rc.right = rc.left + nCellEdge;
 			rc.bottom = rc.top + nCellEdge;
-			dc.FillSolidRect(&rc, clrColors[i * nGridWidth + j]);
+			//dc.FillSolidRect(&rc, clrColors[i * nGridWidth + j]);
+			CBrush brush(clrColors[i * nGridWidth + j]);
+			CPen pen(PS_SOLID, 1, clrColors[i * nGridWidth + j]);
+			pob = dc.SelectObject(&brush);
+			pop = dc.SelectObject(&pen);
+			dc.RoundRect(&rc, pt);
+			dc.SelectObject(pob);
+			dc.SelectObject(pop);
 		}
 	}
 	DrawPreview(&dc, clrCurr, true);

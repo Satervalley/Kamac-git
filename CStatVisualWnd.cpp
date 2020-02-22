@@ -5,7 +5,6 @@
 //#include <memory>
 #include "Kamac.h"
 #include "CStatVisualWnd.h"
-#include "Color.h"
 
 //extern const UINT WM_USER_HOVER_COLOR;
 //extern const UINT WM_USER_SELECT_COLOR;
@@ -110,9 +109,11 @@ void CStatVisualWnd::DrawAll(CRenderTarget* prt)
 	ASSERT(prt);
 	ASSERT_VALID(prt);
 
+	prt->SetDpi(CD2DSizeF(96.f, 96.f));
+	prt->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 	CSize sz;
 	GetScaledWindowSize(sz);
-	prt->Clear(clrBack);
+	prt->Clear(ccBack);
 	DrawAxis(prt, float(szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy));
 	DrawAxis(prt, float(sz.cx - szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy), false);
 	DrawGraph(prt);
@@ -124,7 +125,6 @@ void CStatVisualWnd::DrawAll(CRenderTarget* prt)
 LRESULT CStatVisualWnd::OnDraw2D(WPARAM wParam, LPARAM lParam)
 {
 	CHwndRenderTarget* pRender = (CHwndRenderTarget*)lParam;
-	pRender->SetDpi(CD2DSizeF(96.f, 96.f));
 	DrawAll(pRender);
 	return 0;
 }
@@ -135,7 +135,7 @@ void CStatVisualWnd::DrawAxis(CRenderTarget* prt, float at, float top, float bot
 {
 	ASSERT(prt);
 	CD2DPointF ptFrom, ptTo;
-	CD2DSolidColorBrush brush(prt, clrBorder);
+	CD2DSolidColorBrush brush(prt, ccBorder);
 	float h = bottom - top;
 	ptFrom.x = at;
 	for (int i = 0; i < 21; i++)
@@ -198,7 +198,7 @@ void CStatVisualWnd::DrawAxis(CRenderTarget* prt, float at, float top, float bot
 void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 {
 	CD2DRectF rcf(rectGraphCore), rc, rcClip(rectGraph), rcLabelAll(rectGraph);
-	CD2DSolidColorBrush scb(prt, clrBorder);//, scbb(prt, clrBack);
+	CD2DSolidColorBrush scb(prt, ccBorder);//, scbb(prt, ccBack);
 	
 	rc.left = rcf.left + 1.f;
 	rc.top = rcf.top + 1.f;
@@ -208,16 +208,18 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 	if (bDrawLabel)
 	{
 		rcLabelAll.top = rcf.bottom + 1.f;
-		CD2DSolidColorBrush brushLabelAll(prt, clrBack);
+		CD2DSolidColorBrush brushLabelAll(prt, ccBack);
 		prt->FillRectangle(rcLabelAll, &brushLabelAll);
 	}
 	prt->PushAxisAlignedClip(rcClip);
 	DrawCompLines(prt);
 	for (auto it = gmGraph.GetDataGroups().begin(); it != gmGraph.GetDataGroups().end(); it++)
 	{
-		DrawDataGroup_3(prt, *it, rcf, bDrawLabel, dkCurrTip == (*it)->dkDate);
+		//DrawDataGroup_3(prt, *it, rcf, bDrawLabel, dkCurrTip == (*it)->dkDate);
+		DrawDataGroup_3_Shined(prt, *it, rcf, bDrawLabel, dkCurrTip == (*it)->dkDate);
 	}
-	DrawLegend(prt, rcf, strCurrLegend, dkCurrTip != Date_Key_NULL);
+	//DrawLegend(prt, rcf, strCurrLegend, dkCurrTip != Date_Key_NULL);
+	DrawLegend_Shined(prt, rcf, strCurrLegend, dkCurrTip != Date_Key_NULL);
 	prt->PopAxisAlignedClip();
 	prt->DrawRectangle(rcf, &scb);
 }
@@ -265,7 +267,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 		}
 	}
 	bmpBackground.CreateBitmap(nBackgroundSize, nBackgroundSize, 1, 32, background);
-	pbmpBackground = new CD2DBitmap(prt, bmpBackground, CD2DSizeU(0, 0), FALSE);	// notice: not auto destroy
+	pbmpBackground = new CD2DBitmap(prt, bmpBackground, CD2DSizeU(0, 0));
 	//pbmpBackground->CopyFromMemory(background, nBackgroundSize * sizeof(DWORD));
 	D2D1_BITMAP_BRUSH_PROPERTIES bbp;
 	CD2DBrushProperties bp;
@@ -275,7 +277,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	
 	bp.opacity = 1.;
 	bp.transform = D2D1::Matrix3x2F::Translation(-8., -8.);
-	pbbBrush = new CD2DBitmapBrush(prt, &bbp, nullptr, FALSE);	// notice: not auto destroy
+	pbbBrush = new CD2DBitmapBrush(prt, &bbp, nullptr);
 	pbbBrush->SetBitmap(pbmpBackground);
 
 	NONCLIENTMETRICS ncm;
@@ -289,11 +291,11 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 
 	GetTextSize(prt, _T("88.88"), szLabelText);
 
-	clrBack = D2D1::ColorF(::GetSysColor(COLOR_WINDOW));
-	clrBorder = D2D1::ColorF(::GetSysColor(COLOR_3DSHADOW));
-	clrText = D2D1::ColorF(::GetSysColor(COLOR_WINDOWTEXT));
-	clrVolBorder = D2D1::ColorF(::GetSysColor(COLOR_3DHILIGHT));
-	clrVolBorderHi = D2D1::ColorF(::GetSysColor(COLOR_3DDKSHADOW));
+	ccBack = ::GetSysColor(COLOR_WINDOW);
+	ccBorder = ::GetSysColor(COLOR_3DSHADOW);
+	ccText = ::GetSysColor(COLOR_WINDOWTEXT);
+	ccVolBorder = ::GetSysColor(COLOR_3DHILIGHT);
+	ccVolBorderHi = ::GetSysColor(COLOR_3DDKSHADOW);
 	
 	D2D1_STROKE_STYLE_PROPERTIES ssp;
 	ssp.startCap = D2D1_CAP_STYLE_ROUND;
@@ -303,7 +305,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	ssp.miterLimit = 1.f;
 	ssp.dashStyle = D2D1_DASH_STYLE_CUSTOM;
 	ssp.dashOffset = 0.f;
-	float dashes[2] = { 8.f, 4.f };
+	float dashes[2] = { /*8.f, 4.f*/4.f, 2.f };
 	::AfxGetD2DState()->GetDirect2dFactory()->CreateStrokeStyle(ssp, dashes, 2, &ssDash);
 	return bRes;
 }
@@ -312,18 +314,19 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 //----------------------------------------------------------------------------------------------------------------------
 void CStatVisualWnd::DeleteD2DResource(void)
 {
-	if (pbbBrush)
-	{
-		pbbBrush->Destroy();
-		delete pbbBrush;
-		pbbBrush = nullptr;
-	}
-	if (pbmpBackground)
-	{
-		pbmpBackground->Destroy();
-		delete pbmpBackground;
-		pbmpBackground = nullptr;
-	}
+	// the rendertarget will delete resources
+	//if (pbbBrush)
+	//{
+	//	pbbBrush->Destroy();
+	//	delete pbbBrush;
+	//	pbbBrush = nullptr;
+	//}
+	//if (pbmpBackground)
+	//{
+	//	pbmpBackground->Destroy();
+	//	delete pbmpBackground;
+	//	pbmpBackground = nullptr;
+	//}
 }
 
 
@@ -357,7 +360,7 @@ void CStatVisualWnd::DrawTextOn(CRenderTarget* prt, const CString& str, const CR
 		pt.x = rc.right - sz.cx;
 		pt.x = pt.x < 0 ? 0 : pt.x;
 	}
-	CD2DSolidColorBrush brush(prt, clrText);
+	CD2DSolidColorBrush brush(prt, ccText);
 	prt->DrawTextLayout(CD2DPointF(pt), &tl, &brush);
 }
 
@@ -386,7 +389,7 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 	{
 		int nth = rc.Height();
 		CD2DRectF rect(rc);
-		CD2DSolidColorBrush brushBorder(prt, bHilight? clrVolBorderHi : clrVolBorder);
+		CD2DSolidColorBrush brushBorder(prt, bHilight? ccVolBorderHi : ccVolBorder);
 		for (int i = 0; i < 3; i++)
 		{
 			rect.bottom = (float)rc.bottom;
@@ -398,7 +401,7 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 				rect.top = rect.bottom - GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth) - 1.f;
 			if (rect.left > (float)rc.right || rect.right < (float)rc.left)
 				continue;
-			CD2DSolidColorBrush brushColumn(prt, bHilight? clrVolColorsHi[i] : clrVolColors[i]);
+			CD2DSolidColorBrush brushColumn(prt, bHilight? ccVolColorsHi[i] : ccVolColors[i]);
 			prt->DrawRectangle(rect, &brushBorder);
 			rect.left += .5f;
 			rect.right -= .5f;
@@ -410,10 +413,82 @@ void CStatVisualWnd::DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& p
 		{
 			CD2DTextFormat tf(prt, strFontName, fFontSize);
 			CD2DTextLayout tlLabel(prt, pdg->strDate, tf, CD2DSizeF(200., 100.));
-			CD2DSolidColorBrush brushText(prt, clrText);
+			CD2DSolidColorBrush brushText(prt, ccText);
 			CD2DPointF pt(float(pdg->nBorderXLeft + (pdg->nTotalWidth - szLabelText.cx) / 2), float(rectGraphCore.bottom + 2));
 			prt->DrawTextLayout(pt, &tlLabel, &brushText);
 		}
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::DrawDataGroup_3_Shined(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel, bool bHilight)
+{
+	ASSERT(prt);
+
+	if (pdg)
+	{
+		int nth = rc.Height();
+		CRect rect(rc);
+		for (int i = 0; i < 3; i++)
+		{
+			rect.left = pdg->nDrawXLeft + i * (CDataGroup_3::nColumnWidth + CDataGroup_3::nGap);
+			rect.right = rect.left + CDataGroup_3::nColumnWidth;
+			if (i != 2)	// 0, 1: keystrokes and mouse clicks
+				rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetCountTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
+			else // 2: distance
+				rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
+			if (rect.left > rc.right || rect.right < rc.left)
+				continue;
+			DrawShinedBar(prt, rect, ccVolColors[i], bHilight);
+		}
+		if (bDrawLabel)
+		{
+			CD2DTextFormat tf(prt, strFontName, fFontSize);
+			CD2DTextLayout tlLabel(prt, pdg->strDate, tf, CD2DSizeF(200., 100.));
+			CD2DSolidColorBrush brushText(prt, ccText);
+			CD2DPointF pt(float(pdg->nBorderXLeft + (pdg->nTotalWidth - szLabelText.cx) / 2), float(rectGraphCore.bottom + 2));
+			prt->DrawTextLayout(pt, &tlLabel, &brushText);
+		}
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::DrawShinedBar(CRenderTarget* prt, const CRect& rect, CColorComb cc, bool bHilight)
+{
+#define BAR_REFLECT_AMOUNT 32
+#define BAR_REFLECT_FACTOR 5
+#define BAR_BORDER_DARKNESS 64
+#define BAR_GRADIENT_DARKNESS 32
+
+	CColorComb ccClr(bHilight ? CUtil::CColorUtil::MakeHiColor(cc) : cc.clrColor);
+
+	CColorComb ccBorder(CUtil::CColorUtil::Diff(ccClr, BAR_BORDER_DARKNESS));
+	CColorComb ccEnd(CUtil::CColorUtil::Diff(ccClr, BAR_GRADIENT_DARKNESS));
+	CColorComb ccVol;
+	int r, g, b;
+	CD2DRectF rcf(rect);
+	CD2DSolidColorBrush brush(prt, ccBorder);
+	rcf.right -= 1.f;
+	prt->DrawRectangle(rcf, &brush);
+	for (int i = 1; i < CDataGroup_3::nColumnWidth - 1; i++)
+	{
+		r = ccEnd.R() + (i * (ccClr.R() - ccEnd.R()) / CDataGroup_3::nColumnWidth);
+		g = ccEnd.G() + (i * (ccClr.G() - ccEnd.G()) / CDataGroup_3::nColumnWidth);
+		b = ccEnd.B() + (i * (ccClr.B() - ccEnd.B()) / CDataGroup_3::nColumnWidth);
+
+		if (i < CDataGroup_3::nColumnWidth / 2) 
+		{
+			ccVol = CUtil::CColorUtil::Or(RGB(r, g, b), RGB(255, 255, 255), 
+				(BAR_REFLECT_AMOUNT + BAR_REFLECT_FACTOR * i) > 100 ? 100 : (BAR_REFLECT_AMOUNT + BAR_REFLECT_FACTOR * i));
+		}
+		else 
+		{
+			ccVol = RGB(r, g, b);
+		}
+		brush.SetColor(ccVol);
+		prt->DrawLine(CD2DPointF(rcf.left + (float)i, rcf.top), CD2DPointF(rcf.left + (float)i, rcf.bottom - 1.f), &brush);
 	}
 }
 
@@ -456,9 +531,9 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	CD2DRectF rcBorder(rc.left + 6.f, rc.top + 6.f, rc.left + 6.f + fside, rc.top + 6.f + fside);
 	CD2DRectF rcFill(rcBorder.left + .5f, rcBorder.top + .5f, rcBorder.right - .5f, rcBorder.bottom - .5f);
 
-	CD2DSolidColorBrush brushBorder(prt, bHilight? clrVolBorderHi : clrVolBorder);
-	CD2DSolidColorBrush brushFill(prt, bHilight? clrVolColorsHi[0] : clrVolColors[0]);
-	CD2DSolidColorBrush brushText(prt, clrText);
+	CD2DSolidColorBrush brushBorder(prt, bHilight? ccVolBorderHi : ccVolBorder);
+	CD2DSolidColorBrush brushFill(prt, bHilight? ccVolColorsHi[0] : ccVolColors[0]);
+	CD2DSolidColorBrush brushText(prt, ccText);
 	CD2DPointF pt(rcBorder.right + 4.f, rcBorder.top - 2.f);
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
@@ -469,7 +544,7 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	rcBorder.right += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.left += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.right += (12.f + nMaxLengendStringWidth + fside);
-	brushFill.SetColor(bHilight ? clrVolColorsHi[1] : clrVolColors[1]);
+	brushFill.SetColor(bHilight ? ccVolColorsHi[1] : ccVolColors[1]);
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
 	pt.x = rcBorder.right + 4.f;
@@ -482,7 +557,7 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	rcBorder.right += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.left += (12.f + nMaxLengendStringWidth + fside);
 	rcFill.right += (12.f + nMaxLengendStringWidth + fside);
-	brushFill.SetColor(bHilight ? clrVolColorsHi[2] : clrVolColors[2]);
+	brushFill.SetColor(bHilight ? ccVolColorsHi[2] : ccVolColors[2]);
 	prt->DrawRectangle(rcBorder, &brushBorder);
 	prt->FillRectangle(rcFill, &brushFill);
 	pt.x = rcBorder.right + 4.f;
@@ -494,6 +569,64 @@ void CStatVisualWnd::DrawLegend(CRenderTarget* prt, const CRect& rc, const CStri
 	if (!items[3].IsEmpty())
 	{
 		pt.x = rcBorder.right + 4.f + nMaxLengendStringWidth + 4.f;
+		CD2DTextFormat tfInfo(prt, strFontName, fFontSize);
+		CD2DTextLayout tlInfo(prt, items[3], tfInfo, CD2DSizeF(200.f, 100.f));
+		prt->DrawTextLayout(pt, &tlInfo, &brushText);
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::DrawLegend_Shined(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight)
+{
+	rectLegends[0] = rectLegends[1] = rectLegends[2] = CRect(0, 0, 0, 0);
+	if (!items)
+		return;
+	CSize sz[3];
+	for (int i = 0; i < 3; i++)
+	{
+		GetTextSize(prt, items[i], sz[i]);
+		if (nMaxLengendStringWidth < sz[i].cx)
+			nMaxLengendStringWidth = sz[i].cx;
+	}
+	rectLegends[0].top = rectLegends[1].top = rectLegends[2].top = rc.top + 4;
+	CD2DTextFormat tfKey(prt, strFontName, fFontSize);
+	CD2DTextFormat tfMouse(prt, strFontName, fFontSize);
+	CD2DTextFormat tfDistance(prt, strFontName, fFontSize);
+	CD2DTextLayout tlKey(prt, items[0], tfKey, CD2DSizeF(200.f, 100.f));
+	CD2DTextLayout tlMouse(prt, items[1], tfMouse, CD2DSizeF(200.f, 100.f));
+	CD2DTextLayout tlDistance(prt, items[2], tfDistance, CD2DSizeF(200.f, 100.f));
+	rectLegends[0].bottom = rectLegends[1].bottom = rectLegends[2].bottom = rc.top + 4 + sz[0].cy;
+	rectLegends[0].left = 4;
+
+	int nSide = sz[0].cy - 4;
+	CRect rect(rc.left + 6, rc.top + 6, rc.left + 6 + nSide, rc.top + 6 + nSide);
+
+	CD2DSolidColorBrush brushText(prt, ccText);
+	CD2DPointF pt(rect.right + 4.f, rect.top - 2.f);
+	DrawShinedBar(prt, rect, ccVolColors[0], bHilight);
+	prt->DrawTextLayout(pt, &tlKey, &brushText);
+	rectLegends[0].right = int(pt.x + sz[0].cx);
+
+	rect.left += (12 + nMaxLengendStringWidth + nSide);
+	rect.right += (12 + nMaxLengendStringWidth + nSide);
+	DrawShinedBar(prt, rect, ccVolColors[1], bHilight);
+	pt.x = rect.right + 4.f;
+	prt->DrawTextLayout(pt, &tlMouse, &brushText);
+	rectLegends[1].left = rect.left - 2;
+	rectLegends[1].right = int(pt.x + sz[1].cx);
+
+	rect.left += (12 + nMaxLengendStringWidth + nSide);
+	rect.right += (12 + nMaxLengendStringWidth + nSide);
+	DrawShinedBar(prt, rect, ccVolColors[2], bHilight);
+	pt.x = rect.right + 4.f;
+	prt->DrawTextLayout(pt, &tlDistance, &brushText);
+	rectLegends[2].left = rect.left - 2;
+	rectLegends[2].right = int(pt.x + sz[2].cx);
+
+	if (!items[3].IsEmpty())
+	{
+		pt.x = rect.right + 4.f + nMaxLengendStringWidth + 4.f;
 		CD2DTextFormat tfInfo(prt, strFontName, fFontSize);
 		CD2DTextLayout tlInfo(prt, items[3], tfInfo, CD2DSizeF(200.f, 100.f));
 		prt->DrawTextLayout(pt, &tlInfo, &brushText);
@@ -529,8 +662,8 @@ void CStatVisualWnd::OnLButtonUp(UINT nFlags, CPoint point)
 
 	if (LegendClickEnd(point) >= 0)	// show color selection panel
 	{
-		clrSaved = clrVolColors[nCurrClickedLegend];
-		clrSavedHi = clrVolColorsHi[nCurrClickedLegend];
+		ccSaved = ccVolColors[nCurrClickedLegend];
+		ccSavedHi = ccVolColorsHi[nCurrClickedLegend];
 		COLORREF clr{ 0 };
 		switch (nCurrClickedLegend)
 		{
@@ -567,7 +700,6 @@ void CStatVisualWnd::OnMouseMove(UINT nFlags, CPoint point)
 				if (gmGraph.UpdateDrag(dis, rectGraphCore))
 				{
 					CRenderTarget* prt = GetRenderTarget();
-					prt->SetDpi(CD2DSizeF(96.f, 96.f));
 					prt->BeginDraw();
 					//DrawGraph(prt);
 					DrawAll(prt);
@@ -653,7 +785,6 @@ void CStatVisualWnd::UpdateLegend(void)
 	if (bRedraw)
 	{
 		CRenderTarget* prt = GetRenderTarget();
-		prt->SetDpi(CD2DSizeF(96.f, 96.f));
 		prt->BeginDraw();
 		//DrawGraph(prt, false);
 		DrawAll(prt);
@@ -669,25 +800,25 @@ void CStatVisualWnd::DrawCompLines(CRenderTarget* prt)
 	{
 		CD2DPointF pt1, pt2;
 		CD2DBrushProperties bp;
-		bp.opacity = 1.f;
-		CD2DSolidColorBrush brush(prt, clrVolColors[0], &bp);
+		bp.opacity = .75f;
+		CD2DSolidColorBrush brush(prt, ccVolColors[0], &bp);
 		
 		pt1.x = rectGraphCore.left + 1.f;
 		pt1.y = rectGraphCore.bottom -
 			GetColumnHeight(float(gmGraph.GetCountTop()), float(pnCurrBaseLines[0]), float(rectGraphCore.Height()));
 		pt2.x = rectGraphCore.right - 1.f;
 		pt2.y = pt1.y;
-		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
+		prt->DrawLine(pt1, pt2, &brush, /*.5f*/1.f, ssDash);
 		pt1.y = rectGraphCore.bottom -
 			GetColumnHeight(float(gmGraph.GetCountTop()), float(pnCurrBaseLines[1]), float(rectGraphCore.Height()));
 		pt2.y = pt1.y;
-		brush.SetColor(clrVolColors[1]);
-		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
+		brush.SetColor(ccVolColors[1]);
+		prt->DrawLine(pt1, pt2, &brush, /*.5f*/1.f, ssDash);
 		pt1.y = rectGraphCore.bottom -
 			GetColumnHeight(float(gmGraph.GetDistanceTop()), float(pnCurrBaseLines[2]), float(rectGraphCore.Height()));
 		pt2.y = pt1.y;
-		brush.SetColor(clrVolColors[2]);
-		prt->DrawLine(pt1, pt2, &brush, .5f, ssDash);
+		brush.SetColor(ccVolColors[2]);
+		prt->DrawLine(pt1, pt2, &brush, /*.5f*/1.f, ssDash);
 	}
 }
 
@@ -750,16 +881,15 @@ LRESULT CStatVisualWnd::OnHoverColor(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam)	// hover on a color
 	{
-		clrVolColors[nCurrClickedLegend] = D2D1::ColorF(COLORREF(lParam));
-		clrVolColorsHi[nCurrClickedLegend] = MakeHiColor2(COLORREF(lParam));
+		ccVolColors[nCurrClickedLegend] = COLORREF(lParam);
+		ccVolColorsHi[nCurrClickedLegend] = CUtil::CColorUtil::MakeHiColor(COLORREF(lParam));
 	}
 	else
 	{
-		clrVolColors[nCurrClickedLegend] = clrSaved;
-		clrVolColorsHi[nCurrClickedLegend] = clrSavedHi;
+		ccVolColors[nCurrClickedLegend] = ccSaved;
+		ccVolColorsHi[nCurrClickedLegend] = ccSavedHi;
 	}
 	CRenderTarget* prt = GetRenderTarget();
-	prt->SetDpi(CD2DSizeF(96.f, 96.f));
 	prt->BeginDraw();
 	DrawAll(prt);
 	prt->EndDraw();
@@ -804,40 +934,20 @@ void CStatVisualWnd::SetOptions(CKamacOptions* pko)
 	pkoOptions = pko;
 	if (pkoOptions)
 	{
-		clrVolColors[0] = D2D1::ColorF(pkoOptions->dwVolColor1);
-		clrVolColors[1] = D2D1::ColorF(pkoOptions->dwVolColor2);
-		clrVolColors[2] = D2D1::ColorF(pkoOptions->dwVolColor3);
-		clrVolColorsHi[0] = MakeHiColor2(pkoOptions->dwVolColor1);
-		clrVolColorsHi[1] = MakeHiColor2(pkoOptions->dwVolColor2);
-		clrVolColorsHi[2] = MakeHiColor2(pkoOptions->dwVolColor3);
+		ccVolColors[0] = pkoOptions->dwVolColor1;
+		ccVolColors[1] = pkoOptions->dwVolColor2;
+		ccVolColors[2] = pkoOptions->dwVolColor3;
+		ccVolColorsHi[0] = CUtil::CColorUtil::MakeHiColor(pkoOptions->dwVolColor1);
+		ccVolColorsHi[1] = CUtil::CColorUtil::MakeHiColor(pkoOptions->dwVolColor2);
+		ccVolColorsHi[2] = CUtil::CColorUtil::MakeHiColor(pkoOptions->dwVolColor3);
 	}
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-COLORREF CStatVisualWnd::MakeHiColor(COLORREF clr)
-{
-	float fa = 0.08f;
-	float s, s2, v, v2;
-	CColor color(clr);
-	s = color.GetSaturation();
-	s2 = s + fa;
-	if (s2 > 1.0f)
-		s2 = 1.0f;
-	v = color.GetLuminance();
-	v2 = v + fa;
-	if (v2 > 1.0f)
-		v2 = v - fa;
-	color.SetLuminance(v2);
-	color.SetSaturation(s2);
-	return COLORREF(color);
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 D2D1::ColorF CStatVisualWnd::MakeHiColor2(COLORREF clr)
 {
-	return D2D1::ColorF(MakeHiColor(clr));
+	return D2D1::ColorF(CUtil::CColorUtil::MakeHiColor(clr));
 }
 
 

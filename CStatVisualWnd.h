@@ -2,6 +2,9 @@
 
 #include "CGraphMan.h"
 #include "CColorPickingWnd.h"
+#include "CUtil.h"
+#include "CColorComb.h"
+
 
 extern const UINT WM_USER_COLOR_CHANGED;
 
@@ -27,13 +30,14 @@ protected:
 	CD2DBitmapBrush* pbbBrush{ nullptr };
 	CD2DBitmap* pbmpBackground{ nullptr };
 	CString strFontName;
-	float fFontSize{ 12. };
+	float fFontSize{ 12.f };
 	CSize szMarginText, szMarginGraph, szLabelText;	// margin for text and graph and graph label text
 	DWORD background[nBackgroundSize * nBackgroundSize];
-	D2D1::ColorF clrBack{ 0 }, clrBorder{ 0 }, clrText{ 0 }, clrVolBorder{ 0 }, clrVolBorderHi{ 0 };
-	D2D1::ColorF clrVolColors[3] = { 0x00ff5252, 0xc853, 0x448aff };
-	D2D1::ColorF clrVolColorsHi[3] = {MakeHiColor(0x00ff5252), MakeHiColor(0xc853), MakeHiColor(0x448aff) };
-	D2D1::ColorF clrSaved{ 0 }, clrSavedHi{ 0 };	// for auto preview
+	CColorComb ccBack{ 0 }, ccBorder{ 0 }, ccText{ 0 }, ccVolBorder{ 0 }, ccVolBorderHi{ 0 };
+	CColorComb ccVolColors[3] = { 0x00ff5252, 0xc853, 0x448aff };
+	CColorComb ccVolColorsHi[3] = {CUtil::CColorUtil::MakeHiColor(0x00ff5252), CUtil::CColorUtil::MakeHiColor(0xc853), 
+		CUtil::CColorUtil::MakeHiColor(0x448aff) };
+	CColorComb ccSaved{ 0 }, ccSavedHi{ 0 };	// for auto preview
 	CComPtr<ID2D1StrokeStyle> ssDash;
 	CGraphMan gmGraph;
 	CRect rectGraph, rectGraphCore;	// all graph, graph core area, excluding bottom labels
@@ -61,14 +65,16 @@ protected:
 	void GetTextSize(CRenderTarget * prt, const CString& str,  CSize& sz);
 	void DrawTextOn(CRenderTarget* prt, const CString& str, const CRect& rc, bool bRight = false);
 	void DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true, bool bHilight = false);
+	void DrawDataGroup_3_Shined(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true, bool bHilight = false);
+	void DrawShinedBar(CRenderTarget* prt, const CRect& rect, CColorComb cc, bool bHilight = false);
 	float GetColumnHeight(float nTop, float nValue, float nTotalHeight);
 	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight = false);
+	void DrawLegend_Shined(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight = false);
 	void UpdateLegend(void);
 	void DrawCompLines(CRenderTarget* prt);
 	void DrawAll(CRenderTarget* prt);
 	int LegendClickBegin(const CPoint & pt);
 	int LegendClickEnd(const CPoint& pt);
-	static COLORREF MakeHiColor(COLORREF clr);
 	static D2D1::ColorF MakeHiColor2(COLORREF clr);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

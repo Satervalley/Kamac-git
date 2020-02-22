@@ -218,4 +218,139 @@ public:
         ::_tcscpy(dest, dig);
 #pragma warning(pop)
     }
+
+
+    class CColorUtil
+    {
+    public:
+        // r, g, b: 0 - 255, h: 0 - 360, l, s: 0 - 1
+        static void RGB2HLS(int r, int g, int b, float& h, float& l, float& s)
+        {
+            unsigned char minval = min(r, min(g, b));
+            unsigned char maxval = max(r, max(g, b));
+            float mdiff = float(maxval) - float(minval);
+            float msum = float(maxval) + float(minval);
+
+            l = msum / 510.0f;
+
+            if (maxval == minval)
+            {
+                s = 0.0f;
+                h = 0.0f;
+            }
+            else
+            {
+                float rnorm = (maxval - r) / mdiff;
+                float gnorm = (maxval - g) / mdiff;
+                float bnorm = (maxval - b) / mdiff;
+
+                s = (l <= 0.5f) ? (mdiff / msum) : (mdiff / (510.0f - msum));
+
+                if (r == maxval) 
+                    h = 60.0f * (6.0f + bnorm - gnorm);
+                if (g == maxval) 
+                    h = 60.0f * (2.0f + rnorm - bnorm);
+                if (b == maxval) 
+                    h = 60.0f * (4.0f + gnorm - rnorm);
+                if (h > 360.0f) 
+                    h = h - 360.0f;
+            }
+        }
+
+        // r, g, b: 0 -255, h: 0 - 360, l, s: 0 - 1
+        static void HLS2RGB(float h, float l, float s, int& r, int& g, int& b)
+        {
+            if (s == 0.0) // Grauton, einfacher Fall
+            {
+                r = g = b = unsigned char(l * 255.0);
+            }
+            else
+            {
+                float rm1, rm2;
+
+                if (l <= 0.5f) 
+                    rm2 = l + l * s;
+                else                     
+                    rm2 = l + s - l * s;
+                rm1 = 2.0f * l - rm2;
+                r = ToRGB1(rm1, rm2, h + 120.0f);
+                g = ToRGB1(rm1, rm2, h);
+                b = ToRGB1(rm1, rm2, h - 120.0f);
+            }
+        }
+
+        // h: 0 - 360, l, s: 0 - 1
+        static COLORREF FromHLS(float h, float l, float s)
+        {
+            int r, g, b;
+            HLS2RGB(h, l, s, r, g, b);
+            return RGB(r, g, b);
+        }
+
+
+        static void ToHLS(COLORREF c, float& h, float& l, float& s)
+        {
+            int r = GetRValue(c), g = GetGValue(c), b = GetBValue(c);
+            RGB2HLS(r, g, b, h, l, s);
+        }
+
+
+        static COLORREF MakeHiColor(COLORREF clr)
+        {
+            float fa = 0.08f;
+            float h, s, /*s2,*/ l, l2;
+            ToHLS(clr, h, l, s);
+            //s = color.GetSaturation();
+            //s2 = s + fa;
+            //if (s2 > 1.0f)
+            //	s2 = 1.0f;
+            l2 = l + fa;
+            if (l2 > 1.0f)
+                l2 = l - fa;
+            return FromHLS(h, l2, s);
+        }
+
+        static COLORREF Diff(COLORREF color, UINT nDist)
+        {
+            return RGB(GABS(GetRValue(color) - nDist), GABS(GetGValue(color) - nDist), GABS(GetBValue(color) - nDist));
+        }
+
+
+        static COLORREF Or(COLORREF colFore, COLORREF colBK, UINT nForePercent)
+        {
+            return RGB(
+                (GetRValue(colBK) * 100 + (nForePercent * (GetRValue(colFore) - GetRValue(colBK)))) / 100,
+                (GetGValue(colBK) * 100 + (nForePercent * (GetGValue(colFore) - GetGValue(colBK)))) / 100,
+                (GetBValue(colBK) * 100 + (nForePercent * (GetBValue(colFore) - GetBValue(colBK)))) / 100);
+        }
+
+
+        static COLORREF DarkBorderColor(COLORREF clr, int nDiff = 100)
+        {
+            return Diff(clr, nDiff);
+        }
+    private:
+        static unsigned char ToRGB1(float rm1, float rm2, float rh)
+        {
+            if (rh > 360.0f) 
+                rh -= 360.0f;
+            else if (rh < 0.0f) 
+                rh += 360.0f;
+
+            if (rh < 60.0f) 
+                rm1 = rm1 + (rm2 - rm1) * rh / 60.0f;
+            else if (rh < 180.0f) 
+                rm1 = rm2;
+            else if (rh < 240.0f) 
+                rm1 = rm1 + (rm2 - rm1) * (240.0f - rh) / 60.0f;
+
+            return static_cast<unsigned char>(rm1 * 255);
+        }
+
+
+        static UINT GABS(const int& nmbr)
+        {
+            return (nmbr < 0) ? -nmbr : nmbr;
+        }
+    };
 };
