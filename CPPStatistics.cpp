@@ -4,9 +4,17 @@
 #include "pch.h"
 #include "Kamac.h"
 #include "CPPStatistics.h"
-#include "afxdialogex.h"
+
 
 constexpr UINT WM_USER_VIEW_CHART = WM_USER + 3;
+constexpr UINT WM_USER_NAVI_NEXT = WM_USER + 11;
+constexpr UINT WM_USER_NAVI_PREV = WM_USER + 12;
+constexpr UINT WM_USER_NAVI_NEWEST = WM_USER + 13;
+constexpr UINT WM_USER_NAVI_OLDEST = WM_USER + 14;
+constexpr UINT WM_USER_NAVI_TOP_KBD = WM_USER + 15;
+constexpr UINT WM_USER_NAVI_TOP_MCC = WM_USER + 16;
+constexpr UINT WM_USER_NAVI_TOP_DIS = WM_USER + 17;
+
 extern const UINT WM_USER_COLOR_CHANGED;
 
 // CPPStatistics 对话框
@@ -41,6 +49,13 @@ BEGIN_MESSAGE_MAP(CPPStatistics, CPropertyPage)
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_USER_VIEW_CHART, &CPPStatistics::OnUserShowGraph)
 	ON_MESSAGE(WM_USER_COLOR_CHANGED, OnColorChanged)
+	ON_MESSAGE(WM_USER_NAVI_PREV, &CPPStatistics::OnUserNaviPrev)
+	ON_MESSAGE(WM_USER_NAVI_NEXT, &CPPStatistics::OnUserNaviNext)
+	ON_MESSAGE(WM_USER_NAVI_NEWEST, &CPPStatistics::OnUserNaviNewest)
+	ON_MESSAGE(WM_USER_NAVI_OLDEST, &CPPStatistics::OnUserNaviOldest)
+	ON_MESSAGE(WM_USER_NAVI_TOP_KBD, &CPPStatistics::OnUserNaviTopKBD)
+	ON_MESSAGE(WM_USER_NAVI_TOP_MCC, &CPPStatistics::OnUserNaviTopMCC)
+	ON_MESSAGE(WM_USER_NAVI_TOP_DIS, &CPPStatistics::OnUserNaviTopDIS)
 END_MESSAGE_MAP()
 
 
@@ -52,11 +67,18 @@ BOOL CPPStatistics::OnInitDialog()
 	
 	XHTMLSTATIC_APP_COMMAND appCommands[] = 
 	{
-		{m_hWnd, WM_USER_VIEW_CHART, 0, _T("CMD_VIEW_CHART")}
+		{m_hWnd, WM_USER_VIEW_CHART, 0, _T("CMD_VIEW_CHART")},
+		{m_hWnd, WM_USER_NAVI_NEXT, 0, _T("CMD_NAVI_NEXT")},
+		{m_hWnd, WM_USER_NAVI_PREV, 0, _T("CMD_NAVI_PREV")},
+		{m_hWnd, WM_USER_NAVI_NEWEST, 0, _T("CMD_NAVI_NEWEST")},
+		{m_hWnd, WM_USER_NAVI_OLDEST, 0, _T("CMD_NAVI_OLDEST")},
+		{m_hWnd, WM_USER_NAVI_TOP_KBD, 0, _T("CMD_NAVI_TOP_KBD")},
+		{m_hWnd, WM_USER_NAVI_TOP_MCC, 0, _T("CMD_NAVI_TOP_MCC")},
+		{m_hWnd, WM_USER_NAVI_TOP_DIS, 0, _T("CMD_NAVI_TOP_DIS")},
 	};
 	
 	htmlInfo.ModifyStyleEx(WS_EX_TRANSPARENT, 0);
-	htmlInfo.SetAppCommands(appCommands, 1);
+	htmlInfo.SetAppCommands(appCommands, 8);
 	 
 	CRect rect;
 	GetClientRect(&rect);
@@ -207,5 +229,82 @@ LRESULT CPPStatistics::OnColorChanged(WPARAM wParam, LPARAM lParam)
 	if (ppw)
 		ppw->SendMessage(WM_USER_COLOR_CHANGED);
 	return TRUE;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviPrev(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviPrevNext();
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviNext(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviPrevNext(true);
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviNewest(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviFirstLast(false);
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviOldest(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviFirstLast();
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviTopKBD(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviToDate(dsMan.recKeyMost.dkDate, 0);
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviTopMCC(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 1);
+	}
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviTopDIS(WPARAM wParam, LPARAM lParam)
+{
+	if (bGraphShowed)
+	{
+		svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 2);
+	}
+	return LRESULT(0);
 }
 

@@ -4,6 +4,7 @@
 #include "CColorPickingWnd.h"
 #include "CUtil.h"
 #include "CColorComb.h"
+#include "CStepMan.h"
 
 
 extern const UINT WM_USER_COLOR_CHANGED;
@@ -21,10 +22,20 @@ public:
 	void SetOptions(CKamacOptions* pko);
 	void InitGraph(bool bStartTimer = true);
 	void Hide(void);
+	void BeginNaviPrevNext(bool bNext = false);
+	void BeginNaviFirstLast(bool bFirst = true);
+	void BeginNaviToDate(Date_Key dk, int nVol);
 protected:
 	DECLARE_MESSAGE_MAP()
 
-protected:
+	struct SAnimateBarData
+	{
+		bool bEnable{ false };
+		Date_Key dkDate;
+		int nVolume;
+		int nPercent;
+	};
+
 	static const int nBackgroundSize{ 32 };
 	CBitmap bmpBackground;
 	CD2DBitmapBrush* pbbBrush{ nullptr };
@@ -51,11 +62,13 @@ protected:
 	CRect rectLegends[3];	// legends rects, for color selection
 	int nCurrClickedLegend{ -1 };	// for legend clicking, if legend clicked, show color selection panel
 	CColorPickingWnd cpColorPicker;
-	UINT uiTimerID{ 1 };	// timer for column values tip	
+	UINT uiTimerID_Tip{ 1 }, uiTimerID_Navi{ 2 };	// timer for column values tip, navigation animation
 	CKamacOptions* pkoOptions{ nullptr };
 
 	BOOL bDragging{ FALSE };
 	CPoint ptLast;	// for track dragging
+
+	SAnimateBarData abdAniBar;
 
 	BOOL PrepareD2DResource(void);
 	void DeleteD2DResource(void);
@@ -67,16 +80,18 @@ protected:
 	void DrawDataGroup_3(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true, bool bHilight = false);
 	void DrawDataGroup_3_Shined(CRenderTarget* prt, CDataGroup_3_Pointer& pdg, const CRect& rc, bool bDrawLabel = true, bool bHilight = false);
 	void DrawShinedBar(CRenderTarget* prt, const CRect& rect, CColorComb cc, bool bHilight = false);
-	float GetColumnHeight(float nTop, float nValue, float nTotalHeight);
+	float GetColumnHeight(float nTop, float nValue, float nTotalHeight, int nPercent = 100);
 	void DrawLegend(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight = false);
 	void DrawLegend_Shined(CRenderTarget* prt, const CRect& rc, const CString* items, bool bHilight = false);
 	void UpdateLegend(void);
 	void DrawCompLines(CRenderTarget* prt);
-	void DrawAll(CRenderTarget* prt);
+	void DrawAll(CRenderTarget* prt = nullptr);
 	int LegendClickBegin(const CPoint & pt);
 	int LegendClickEnd(const CPoint& pt);
+	void AnimateMove(int nDis, int nSteps = 10, DWORD dwDelay = 40);
+	void AnimateBar(Date_Key dk, int nVol, int nSteps = 10, DWORD dwDelay = 40);
 	static D2D1::ColorF MakeHiColor2(COLORREF clr);
-public:
+
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();

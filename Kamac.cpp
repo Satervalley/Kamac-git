@@ -6,8 +6,8 @@
 #include "framework.h"
 #include "Kamac.h"
 #include "CKamacCmdLineInfo.h"
+#include "CUtil.h"
 
-//#include "KamacDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,11 +28,14 @@ CKamacApp::CKamacApp()
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
-	// TODO: 在此处添加构造代码，
-	// 将所有重要的初始化放置在 InitInstance 中
 }
 
 
+CKamacApp::~CKamacApp()
+{
+	if (atomInstance)
+		::GlobalDeleteAtom(atomInstance);
+}
 // 唯一的 CKamacApp 对象
 
 CKamacApp theApp;
@@ -42,6 +45,12 @@ CKamacApp theApp;
 
 BOOL CKamacApp::InitInstance()
 {
+	if (CheckExist())	// already running
+	{
+		::AfxMessageBox(_T("Kamac already running!"), MB_OK | MB_ICONINFORMATION);
+		return FALSE;
+	}
+
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
 	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
@@ -75,31 +84,10 @@ BOOL CKamacApp::InitInstance()
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
 	
-	//CKamacDlg dlg;
-	//m_pMainWnd = &dlg;
-	//INT_PTR nResponse = dlg.DoModal();
-	//if (nResponse == IDOK)
-	//{
-	//	// TODO: 在此放置处理何时用
-	//	//  “确定”来关闭对话框的代码
-	//}
-	//else if (nResponse == IDCANCEL)
-	//{
-	//	// TODO: 在此放置处理何时用
-	//	//  “取消”来关闭对话框的代码
-	//}
-	//else if (nResponse == -1)
-	//{
-	//	TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
-	//}
-
-
 #if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
 	ControlBarCleanUp();
 #endif
 
-	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
-	//  而不是启动应用程序的消息泵。
 	return TRUE;
 }
 
@@ -111,3 +99,23 @@ BOOL CKamacApp::OnIdle(LONG lCount)
 
 	return CWinApp::OnIdle(lCount);
 }
+
+
+BOOL CKamacApp::CheckExist(void)
+{
+	CString str, strHash;
+	::GetModuleFileName(theApp.m_hInstance, str.GetBufferSetLength(1025), 1025);
+	str.ReleaseBuffer();
+/*
+	str.MakeLower();
+	CUtil::ComputeSHA1(str, strHash);
+	BOOL b = (::GlobalFindAtom(strHash) != 0);
+	if (!b)
+	{
+		atomInstance = ::GlobalAddAtom(strHash);
+	}
+	return b;
+*/
+	return CUtil::FindRunningProcess(str);
+}
+

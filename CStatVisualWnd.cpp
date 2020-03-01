@@ -106,9 +106,12 @@ void CStatVisualWnd::GetScaledWindowSize(CSize& sz)
 //----------------------------------------------------------------------------------------------------------------------
 void CStatVisualWnd::DrawAll(CRenderTarget* prt)
 {
-	ASSERT(prt);
-	ASSERT_VALID(prt);
-
+	bool b = (prt == nullptr);
+	if (b)
+	{
+		prt = GetRenderTarget();
+		prt->BeginDraw();
+	}
 	prt->SetDpi(CD2DSizeF(96.f, 96.f));
 	prt->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 	CSize sz;
@@ -117,7 +120,8 @@ void CStatVisualWnd::DrawAll(CRenderTarget* prt)
 	DrawAxis(prt, float(szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy));
 	DrawAxis(prt, float(sz.cx - szMarginGraph.cx), 4.f, float(sz.cy - 4 - szMarginGraph.cy), false);
 	DrawGraph(prt);
-
+	if (b)
+		prt->EndDraw();
 }
 
 
@@ -200,8 +204,8 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 	CD2DRectF rcf(rectGraphCore), rc, rcClip(rectGraph), rcLabelAll(rectGraph);
 	CD2DSolidColorBrush scb(prt, ccBorder);//, scbb(prt, ccBack);
 	
-	rc.left = rcf.left + 1.f;
-	rc.top = rcf.top + 1.f;
+	rc.left = rcf.left;
+	rc.top = rcf.top;
 	rc.right = rcf.right - 1.f;
 	rc.bottom = rcf.bottom - 1.f;
 	prt->FillRectangle(rc, pbbBrush);
@@ -307,6 +311,7 @@ BOOL CStatVisualWnd::PrepareD2DResource(void)
 	ssp.dashOffset = 0.f;
 	float dashes[2] = { /*8.f, 4.f*/4.f, 2.f };
 	::AfxGetD2DState()->GetDirect2dFactory()->CreateStrokeStyle(ssp, dashes, 2, &ssDash);
+
 	return bRes;
 }
 
@@ -376,7 +381,7 @@ void CStatVisualWnd::InitGraph(bool bStartTimer)
 	gmGraph.Init(rectGraphCore);
 	bDragging = FALSE;
 	if(bStartTimer)
-		SetTimer(uiTimerID, 400, nullptr);
+		SetTimer(uiTimerID_Tip, 400, nullptr);
 }
 
 
@@ -434,10 +439,22 @@ void CStatVisualWnd::DrawDataGroup_3_Shined(CRenderTarget* prt, CDataGroup_3_Poi
 		{
 			rect.left = pdg->nDrawXLeft + i * (CDataGroup_3::nColumnWidth + CDataGroup_3::nGap);
 			rect.right = rect.left + CDataGroup_3::nColumnWidth;
-			if (i != 2)	// 0, 1: keystrokes and mouse clicks
-				rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetCountTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
-			else // 2: distance
-				rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
+			if (abdAniBar.bEnable && pdg->dkDate == abdAniBar.dkDate && i == abdAniBar.nVolume)
+			{
+				if (i != 2)	// 0, 1: keystrokes and mouse clicks
+					rect.top = rect.bottom - 
+					int(GetColumnHeight((float)gmGraph.GetCountTop(), (float)pdg->nData[i], (float)nth, abdAniBar.nPercent) + 0.5f);
+				else // 2: distance
+					rect.top = rect.bottom - 
+					int(GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth, abdAniBar.nPercent) + 0.5f);
+			}
+			else
+			{
+				if (i != 2)	// 0, 1: keystrokes and mouse clicks
+					rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetCountTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
+				else // 2: distance
+					rect.top = rect.bottom - int(GetColumnHeight((float)gmGraph.GetDistanceTop(), (float)pdg->nData[i], (float)nth) + 0.5f);
+			}
 			if (rect.left > rc.right || rect.right < rc.left)
 				continue;
 			DrawShinedBar(prt, rect, ccVolColors[i], bHilight);
@@ -494,9 +511,10 @@ void CStatVisualWnd::DrawShinedBar(CRenderTarget* prt, const CRect& rect, CColor
 
 
 //----------------------------------------------------------------------------------------------------------------------
-float CStatVisualWnd::GetColumnHeight(float nTop, float nValue, float nTotalHeight)
+float CStatVisualWnd::GetColumnHeight(float nTop, float nValue, float nTotalHeight, int nPercent)
 {
-	float h = nValue / nTop * nTotalHeight;
+	float factor = float(nPercent) / 100.f;
+	float h = nValue / nTop * nTotalHeight * factor;
 	h = h < 2. ? 2 : h;
 	h = h > nTop ? nTop : h;
 	return h;
@@ -698,13 +716,7 @@ void CStatVisualWnd::OnMouseMove(UINT nFlags, CPoint point)
 			if (dis != 0)
 			{
 				if (gmGraph.UpdateDrag(dis, rectGraphCore))
-				{
-					CRenderTarget* prt = GetRenderTarget();
-					prt->BeginDraw();
-					//DrawGraph(prt);
-					DrawAll(prt);
-					prt->EndDraw();
-				}
+					DrawAll();
 			}
 		}
 	}
@@ -717,7 +729,7 @@ void CStatVisualWnd::OnMouseMove(UINT nFlags, CPoint point)
 void CStatVisualWnd::Hide(void)
 {
 	ShowWindow(SW_HIDE);
-	KillTimer(uiTimerID);
+	KillTimer(uiTimerID_Tip);
 }
 
 
@@ -726,7 +738,12 @@ void CStatVisualWnd::OnTimer(UINT_PTR nIDEvent)
 {
 	if (bDragging)
 		return;
-	UpdateLegend();
+	if(nIDEvent == uiTimerID_Tip)
+		UpdateLegend();
+	if (nIDEvent == uiTimerID_Navi)
+	{
+
+	}
 	CWnd::OnTimer(nIDEvent);
 }
 
@@ -783,13 +800,7 @@ void CStatVisualWnd::UpdateLegend(void)
 		}
 	}
 	if (bRedraw)
-	{
-		CRenderTarget* prt = GetRenderTarget();
-		prt->BeginDraw();
-		//DrawGraph(prt, false);
-		DrawAll(prt);
-		prt->EndDraw();
-	}
+		DrawAll();
 }
 
 
@@ -889,10 +900,7 @@ LRESULT CStatVisualWnd::OnHoverColor(WPARAM wParam, LPARAM lParam)
 		ccVolColors[nCurrClickedLegend] = ccSaved;
 		ccVolColorsHi[nCurrClickedLegend] = ccSavedHi;
 	}
-	CRenderTarget* prt = GetRenderTarget();
-	prt->BeginDraw();
-	DrawAll(prt);
-	prt->EndDraw();
+	DrawAll();
 	return TRUE;
 }
 
@@ -948,6 +956,79 @@ void CStatVisualWnd::SetOptions(CKamacOptions* pko)
 D2D1::ColorF CStatVisualWnd::MakeHiColor2(COLORREF clr)
 {
 	return D2D1::ColorF(CUtil::CColorUtil::MakeHiColor(clr));
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::BeginNaviPrevNext(bool bNext)
+{
+	AnimateMove(gmGraph.GetPageDistance(rectGraphCore, bNext));
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::BeginNaviFirstLast(bool bFirst)
+{
+	AnimateMove(bFirst? gmGraph.PrepareForNaviToFirst(rectGraphCore.Width(), rectGraphCore.left) : 
+		gmGraph.PrepareForNaviToLast(rectGraphCore.Width(), rectGraphCore.right - CDataGroup_3::nTotalWidth));
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::BeginNaviToDate(Date_Key dk, int nVol)
+{
+	int nWidth = rectGraphCore.Width();
+	int nPosLeft = rectGraphCore.left + (nWidth - CDataGroup_3::nTotalWidth) / 2;
+	AnimateMove(gmGraph.PrepareForNaviToDate(dk, nWidth, nPosLeft));
+	AnimateBar(dk, nVol);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::AnimateMove(int nDis, int nSteps, DWORD dwDelay)
+{
+	CStepMan smSteps(nSteps);
+	if (nDis != 0)
+	{
+		smSteps.SetSpan_Inc(nDis);
+		for (size_t i = 0; i < smSteps.Count(); i++)
+		{
+			if (smSteps[i] == 0)
+				break;
+			if (gmGraph.UpdateDrag(smSteps[i], rectGraphCore))
+			{
+				DrawAll();
+				::Sleep(dwDelay);
+			}
+			else
+				break;
+		}
+	}
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::AnimateBar(Date_Key dk, int nVol, int nSteps, DWORD dwDelay)
+{
+	ASSERT(nVol >= 0 && nVol < 3);
+
+	CStepMan smSteps(nSteps);
+	smSteps.SetSpan_IncDec(100);
+	
+	abdAniBar.bEnable = true;
+	abdAniBar.dkDate = dk;
+	abdAniBar.nVolume = nVol;
+	abdAniBar.nPercent = 0;
+	for (size_t i = 0; i < smSteps.Count(); i++)
+	{
+		if (smSteps[i] == 0)
+			break;
+		abdAniBar.nPercent += smSteps[i];
+		DrawAll();
+		::Sleep(dwDelay);
+	}
+	abdAniBar.bEnable = false;
+	//DrawAll();
 }
 
 

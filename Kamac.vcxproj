@@ -187,6 +187,7 @@
     <ClInclude Include="CPPOptions.h" />
     <ClInclude Include="CPPStatistics.h" />
     <ClInclude Include="CStatVisualWnd.h" />
+    <ClInclude Include="CStepMan.h" />
     <ClInclude Include="CUtil.h" />
     <ClInclude Include="HighColorTab.hpp" />
     <ClInclude Include="Kamac.h" />

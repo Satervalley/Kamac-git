@@ -44,13 +44,13 @@ protected:
 	};
 	const TCHAR* htmlShowGraph = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>Show Graph</u></font></b></a>");
 	const TCHAR* htmlNavigation = { 
-		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> ∣← </font></a>&nbsp;&nbsp;") 
-		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> ← </font></a>&nbsp;&nbsp;")
-		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
-		_T("&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
-		_T("&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"%s\"> ↑ </font></a>&nbsp;&nbsp;")
-		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> → </font></a>&nbsp;&nbsp;")
-		_T("&nbsp;&nbsp;<a href=\"app:CMD_VIEW_CHART\"><font color=\"blue\"> →∣ </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_OLDEST\"><font color=\"blue\"> ∣← </font></a>&nbsp;&nbsp;") 
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_PREV\"><font color=\"blue\"> ← </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_TOP_KBD\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
+		_T("&nbsp;<a href=\"app:CMD_NAVI_TOP_MCC\"><font color=\"%s\"> ↑ </font></a>&nbsp;")
+		_T("&nbsp;<a href=\"app:CMD_NAVI_TOP_DIS\"><font color=\"%s\"> ↑ </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_NEXT\"><font color=\"blue\"> → </font></a>&nbsp;&nbsp;")
+		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_NEWEST\"><font color=\"blue\"> →∣ </font></a>&nbsp;&nbsp;")
 	};
 
 	const TCHAR* htmlError = _T("<center><font color=\"red\" size=\"+6\">Error: %s!</font></center>");
@@ -65,6 +65,13 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnUserShowGraph(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnColorChanged(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviPrev(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviNext(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviNewest(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviOldest(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviTopKBD(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviTopMCC(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviTopDIS(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 };

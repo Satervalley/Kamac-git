@@ -9,6 +9,16 @@ int Date_Key_Comp(Date_Key dk1, Date_Key dk2)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+bool Date_Key_Between(Date_Key dk, Date_Key dk1, Date_Key dk2, bool bInc)
+{
+	if(bInc)
+		return (dk >= DateKeyMin(dk1, dk2) && dk <= DateKeyMax(dk1, dk2));
+	else
+		return (dk > DateKeyMin(dk1, dk2) && dk < DateKeyMax(dk1, dk2));
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 Date_Key DateKeyToday(void)
 {
 	SYSTEMTIME st;
@@ -45,6 +55,16 @@ Date_Key DateKeyNextDay(Date_Key dk)
 Date_Key DateKeyPrevDay(Date_Key dk)
 {
 	return DateKeyAddDay(dk, -1);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+int DateKeyDiff(Date_Key dk1, Date_Key dk2)
+{
+	CTime tm1(DateKeyYear(dk1), DateKeyMonth(dk1), DateKeyDay(dk1), 1, 0, 0);
+	CTime tm2(DateKeyYear(dk2), DateKeyMonth(dk2), DateKeyDay(dk2), 1, 0, 0);
+	CTimeSpan ts = tm1 - tm2;
+	return int(ts.GetDays());
 }
 
 

@@ -13,17 +13,22 @@ constexpr Date_Key Date_Key_NULL = 0 ;
 #define DateKeyYear(dk) ((dk) >> 16)
 #define DateKeyMonth(dk) (((dk) >> 8) & 0x000000ff)
 #define DateKeyDay(dk) ((dk) & 0x000000ff)
+#define DateKeyMin(dk1, dk2) (((dk1) < (dk2))? (dk1) : (dk2))
+#define DateKeyMax(dk1, dk2) (((dk1) < (dk2))? (dk2) : (dk1))
+
 
 constexpr Date_Key Date_Key_Min = MakeDateKey(2020, 1, 1);
 
 
 //----------------------------------------------------------------------------------------------------------------------
 int Date_Key_Comp(Date_Key dk1, Date_Key dk2);
+bool Date_Key_Between(Date_Key dk, Date_Key dk1, Date_Key dk2, bool bInc = true);
 Date_Key DateKeyToday(void);
 Date_Key DateKeyYestoday(void);
 Date_Key DateKeyAddDay(Date_Key dk, int diff);
 Date_Key DateKeyNextDay(Date_Key dk);
 Date_Key DateKeyPrevDay(Date_Key dk);
+int DateKeyDiff(Date_Key dk1, Date_Key dk2);
 CString MakeDateString(Date_Key dk, bool bWithYear = true);
 
 

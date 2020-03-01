@@ -22,7 +22,7 @@ class CKamacApp : public CWinApp
 {
 public:
 	CKamacApp();
-
+	~CKamacApp();
 // 重写
 public:
 	virtual BOOL InitInstance();
@@ -32,9 +32,10 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	ATOM atomInstance{ 0 };
 	CKamacSheet* ppsSheet{ nullptr };
 
-public:
+	BOOL CheckExist(void);
 	virtual BOOL OnIdle(LONG lCount);
 };
 

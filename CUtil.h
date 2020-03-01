@@ -1,6 +1,11 @@
 #pragma once
 
 #include "framework.h"
+#include <wincrypt.h>
+#include <Psapi.h>
+
+#pragma comment(lib,"Advapi32.lib")
+#pragma comment(lib, "psapi.lib")
 
 class CUtil
 {
@@ -353,4 +358,95 @@ public:
             return (nmbr < 0) ? -nmbr : nmbr;
         }
     };
+
+    static BOOL ComputeSHA1(IN OUT LPBYTE* ppData, IN OUT DWORD* pdwlength)
+    {
+        if (!ppData || !*ppData || !pdwlength || !*pdwlength || IsBadReadPtr(*ppData, *pdwlength)) 
+            return FALSE;
+        BOOL bResult = FALSE;
+        HCRYPTPROV hProvider = NULL;
+        HCRYPTHASH hHash = NULL;
+        if (CryptAcquireContext(&hProvider, NULL, NULL, PROV_RSA_FULL, 0))
+        {
+            if (CryptCreateHash(hProvider, CALG_SHA, 0, 0, &hHash))
+            {
+                if (CryptHashData(hHash, *ppData, (DWORD)*pdwlength, 0))
+                {
+                    DWORD _size = sizeof(DWORD);
+                    DWORD dwValue;
+                    if (CryptGetHashParam(hHash, HP_HASHSIZE, (LPBYTE)&dwValue, &_size, 0))
+                    {
+                        *pdwlength = dwValue;
+                        delete[](*ppData);
+                        *ppData = new BYTE[dwValue];
+                        bResult = CryptGetHashParam(hHash, HP_HASHVAL, (LPBYTE)*ppData, pdwlength, 0);
+                    }
+                }
+            }
+        }
+        if (hHash) 
+            CryptDestroyHash(hHash);
+        if (hProvider) 
+            CryptReleaseContext(hProvider, 0);
+        return bResult;
+    }
+
+    static BOOL ComputeSHA1(const CString& str, CString& strRes)
+    {
+        BOOL bRes{ FALSE };
+        if (!str.IsEmpty())
+        {
+            DWORD dwLen = str.GetLength() * sizeof(TCHAR);
+            BYTE* buf = new BYTE[dwLen];
+            ::memcpy_s(buf, dwLen, LPCTSTR(str), dwLen);
+            bRes = ComputeSHA1(&buf, &dwLen);
+            if (bRes)
+            {
+                CString strt;
+                for (DWORD i = 0; i < dwLen; i++)
+                {
+                    strt.Format(_T("%02x"), buf[i]);
+                    strRes += strt;
+                }
+            }
+            delete[] buf;
+        }
+        return bRes;
+    }
+
+
+    static BOOL FindRunningProcess(LPCTSTR path)
+    {
+        static DWORD dwPIDS[2048];
+        
+        BOOL bRes = FALSE;
+        DWORD dw = 0;
+        if (::EnumProcesses(dwPIDS, sizeof(DWORD) * 2048, &dw))
+        {
+            CString str;
+            int n = dw / sizeof(DWORD);
+            for (int i = 0; i < n; i++)
+            {
+                HANDLE h = ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, dwPIDS[i]);
+                if (h)
+                {
+                    dw = 1025;
+                    BOOL b = ::QueryFullProcessImageName(h, 0, str.GetBufferSetLength(1026), &dw);
+                    str.ReleaseBuffer();
+                    if (b)
+                    {
+                        if (str == path)
+                        {
+                            if (::GetCurrentProcessId() != dwPIDS[i])
+                            {
+                                bRes = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bRes;
+    }
 };
