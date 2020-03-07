@@ -14,6 +14,7 @@ constexpr UINT WM_USER_NAVI_OLDEST = WM_USER + 14;
 constexpr UINT WM_USER_NAVI_TOP_KBD = WM_USER + 15;
 constexpr UINT WM_USER_NAVI_TOP_MCC = WM_USER + 16;
 constexpr UINT WM_USER_NAVI_TOP_DIS = WM_USER + 17;
+constexpr UINT WM_USER_NAVI_TOP_ACT = WM_USER + 18;
 
 extern const UINT WM_USER_COLOR_CHANGED;
 
@@ -56,6 +57,7 @@ BEGIN_MESSAGE_MAP(CPPStatistics, CPropertyPage)
 	ON_MESSAGE(WM_USER_NAVI_TOP_KBD, &CPPStatistics::OnUserNaviTopKBD)
 	ON_MESSAGE(WM_USER_NAVI_TOP_MCC, &CPPStatistics::OnUserNaviTopMCC)
 	ON_MESSAGE(WM_USER_NAVI_TOP_DIS, &CPPStatistics::OnUserNaviTopDIS)
+	ON_MESSAGE(WM_USER_NAVI_TOP_ACT, &CPPStatistics::OnUserNaviTopACT)
 END_MESSAGE_MAP()
 
 
@@ -75,10 +77,11 @@ BOOL CPPStatistics::OnInitDialog()
 		{m_hWnd, WM_USER_NAVI_TOP_KBD, 0, _T("CMD_NAVI_TOP_KBD")},
 		{m_hWnd, WM_USER_NAVI_TOP_MCC, 0, _T("CMD_NAVI_TOP_MCC")},
 		{m_hWnd, WM_USER_NAVI_TOP_DIS, 0, _T("CMD_NAVI_TOP_DIS")},
+		{m_hWnd, WM_USER_NAVI_TOP_ACT, 0, _T("CMD_NAVI_TOP_ACT")}
 	};
 	
 	htmlInfo.ModifyStyleEx(WS_EX_TRANSPARENT, 0);
-	htmlInfo.SetAppCommands(appCommands, 8);
+	htmlInfo.SetAppCommands(appCommands, sizeof(appCommands) / sizeof(XHTMLSTATIC_APP_COMMAND));
 	 
 	CRect rect;
 	GetClientRect(&rect);
@@ -168,6 +171,7 @@ BOOL CPPStatistics::OnSetActive()
 	{
 		MakeInfoString(dsMan, FALSE);
 		htmlInfo.SetWindowText(strHtml);
+		//OnUserShowGraph(0, 0);
 	}
 	else
 	{
@@ -235,10 +239,9 @@ LRESULT CPPStatistics::OnColorChanged(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviPrev(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviPrevNext();
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviPrevNext();
 	return LRESULT(0);
 }
 
@@ -246,10 +249,9 @@ LRESULT CPPStatistics::OnUserNaviPrev(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviNext(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviPrevNext(true);
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviPrevNext(true);
 	return LRESULT(0);
 }
 
@@ -257,10 +259,9 @@ LRESULT CPPStatistics::OnUserNaviNext(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviNewest(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviFirstLast(false);
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviFirstLast(false);
 	return LRESULT(0);
 }
 
@@ -268,10 +269,9 @@ LRESULT CPPStatistics::OnUserNaviNewest(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviOldest(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviFirstLast();
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviFirstLast();
 	return LRESULT(0);
 }
 
@@ -279,10 +279,9 @@ LRESULT CPPStatistics::OnUserNaviOldest(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviTopKBD(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviToDate(dsMan.recKeyMost.dkDate, 0);
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviToDate(dsMan.recKeyMost.dkDate, 0);
 	return LRESULT(0);
 }
 
@@ -290,10 +289,9 @@ LRESULT CPPStatistics::OnUserNaviTopKBD(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviTopMCC(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 1);
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 1);
 	return LRESULT(0);
 }
 
@@ -301,10 +299,20 @@ LRESULT CPPStatistics::OnUserNaviTopMCC(WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------------------
 LRESULT CPPStatistics::OnUserNaviTopDIS(WPARAM wParam, LPARAM lParam)
 {
-	if (bGraphShowed)
-	{
-		svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 2);
-	}
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	svStatVisual.BeginNaviToDate(dsMan.recMouseMost.dkDate, 2);
+	return LRESULT(0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+LRESULT CPPStatistics::OnUserNaviTopACT(WPARAM wParam, LPARAM lParam)
+{
+	if (!bGraphShowed)
+		OnUserShowGraph(0, 0);
+	bool bVols[3]{ true, true, false };
+	svStatVisual.BeginNaviToDate(dsMan.recActivityMost.dkDate, bVols);
 	return LRESULT(0);
 }
 

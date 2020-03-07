@@ -35,12 +35,12 @@ protected:
 	bool bGraphShowed{ false };
 	
 	const TCHAR* htmlStr = {
-		_T("&nbsp;&nbsp;&nbsp;&nbsp;It's been <font color=\"#aa00ff\">%d</font> day(s) since you first ran Kamac on <font color=\"#aa00ff\">%s</font>, ")
+		_T("&nbsp;&nbsp;&nbsp;&nbsp;It's been <font color=\"#aa00ff\">%d</font> day(s) since you first ran Kamac on <a href=\"app:CMD_NAVI_OLDEST\"><font color=\"#aa00ff\"><u>%s</u></font></a>, ")
 		_T("including <font color=\"#aa00ff\">%d</font> day(s) of records! ")
-		_T("The most keystroke is on <font color=\"%s\">%s</font>, <font color=\"%s\">%d</font> keystrokes; ")
-		_T("the most mouse clicking is on <font color=\"%s\">%s</font>, <font color=\"%s\">%d</font> mouse clicks; ")
-		_T("the most activity is on <font color=\"#aa00ff\">%s</font>, <font color=\"#aa00ff\">%d</font> keyboard and mouse activities; ")
-		_T("the longest moving is on <font color=\"%s\">%s</font>, <font color=\"%s\">%dm</font>.<br>")
+		_T("The most keystroke is on <a href=\"app:CMD_NAVI_TOP_KBD\"><font color=\"%s\"><u>%s</u></font></a>, <font color=\"%s\">%d</font> keystrokes; ")
+		_T("the most mouse clicking is on <a href=\"app:CMD_NAVI_TOP_MCC\"><font color=\"%s\"><u>%s</u></font></a>, <font color=\"%s\">%d</font> mouse clicks; ")
+		_T("the most activity is on <a href=\"app:CMD_NAVI_TOP_ACT\"><font color=\"#aa00ff\"><u>%s</u></font></a>, <font color=\"#aa00ff\">%d</font> keyboard and mouse activities; ")
+		_T("the longest moving is on <a href=\"app:CMD_NAVI_TOP_DIS\"><font color=\"%s\"><u>%s</u></font></a>, <font color=\"%s\">%dm</font>.<br>")
 	};
 	const TCHAR* htmlShowGraph = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>Show chart</u></font></b></a>");
 	const TCHAR* htmlNavigation = { 
@@ -72,6 +72,7 @@ protected:
 	afx_msg LRESULT OnUserNaviTopKBD(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUserNaviTopMCC(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUserNaviTopDIS(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUserNaviTopACT(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 };

@@ -32,9 +32,6 @@ CStatVisualWnd::~CStatVisualWnd()
 
 BEGIN_MESSAGE_MAP(CStatVisualWnd, CWnd)
 	ON_WM_CREATE()
-//	ON_WM_ERASEBKGND()
-//	ON_WM_PAINT()
-//	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(AFX_WM_DRAW2D, OnDraw2D)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
@@ -56,35 +53,6 @@ int CStatVisualWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	PrepareD2DResource();
 
 	return 0;
-}
-
-
-BOOL CStatVisualWnd::OnEraseBkgnd(CDC* pDC)
-{
-	//if (hrtRender.IsValid())
-	//	return TRUE;
-	//else
-		return CWnd::OnEraseBkgnd(pDC);
-}
-
-
-void CStatVisualWnd::OnPaint()
-{
-	CPaintDC dc(this); // device context for painting
-					   // 不为绘图消息调用 CWnd::OnPaint()
-	//hrtRender.BeginDraw();
-
-	//D2D1_COLOR_F color = { .5f, .5f, .5f, 1.f }; // r, g, b, a
-	//hrtRender.Clear(color);
-	//CD2DRoundedRect rr(CD2DRectF(10., 10., 130., 120.), CD2DSizeF(8., 8.));
-	//CD2DSolidColorBrush brush(&hrtRender, { 1., 1., 1., 1. });
-	//hrtRender.DrawRoundedRectangle(&rr, &brush);
-	//HRESULT hr = hrtRender.EndDraw();
-	//// if the render target has been lost, then recreate it
-	//if (D2DERR_RECREATE_TARGET == hr)
-	//{
-	//	hrtRender.ReCreate(m_hWnd);
-	//}
 }
 
 
@@ -226,15 +194,6 @@ void CStatVisualWnd::DrawGraph(CRenderTarget* prt, bool bDrawLabel)
 	DrawLegend_Shined(prt, rcf, strCurrLegend, dkCurrTip != Date_Key_NULL);
 	prt->PopAxisAlignedClip();
 	prt->DrawRectangle(rcf, &scb);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void CStatVisualWnd::OnSize(UINT nType, int cx, int cy)
-{
-	CWnd::OnSize(nType, cx, cy);
-
-//	hrtRender.Resize(CD2DSizeU(cx, cy));
 }
 
 
@@ -439,7 +398,7 @@ void CStatVisualWnd::DrawDataGroup_3_Shined(CRenderTarget* prt, CDataGroup_3_Poi
 		{
 			rect.left = pdg->nDrawXLeft + i * (CDataGroup_3::nColumnWidth + CDataGroup_3::nGap);
 			rect.right = rect.left + CDataGroup_3::nColumnWidth;
-			if (abdAniBar.bEnable && pdg->dkDate == abdAniBar.dkDate && i == abdAniBar.nVolume)
+			if (abdAniBar.bEnable && pdg->dkDate == abdAniBar.dkDate && abdAniBar.bVolumes[i])
 			{
 				if (i != 2)	// 0, 1: keystrokes and mouse clicks
 					rect.top = rect.bottom - 
@@ -985,6 +944,16 @@ void CStatVisualWnd::BeginNaviToDate(Date_Key dk, int nVol)
 
 
 //----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::BeginNaviToDate(Date_Key dk, bool bVols[3])
+{
+	int nWidth = rectGraphCore.Width();
+	int nPosLeft = rectGraphCore.left + (nWidth - CDataGroup_3::nTotalWidth) / 2;
+	AnimateMove(gmGraph.PrepareForNaviToDate(dk, nWidth, nPosLeft));
+	AnimateBars(dk, bVols);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
 void CStatVisualWnd::AnimateMove(int nDis, int nSteps, DWORD dwDelay)
 {
 	CStepMan smSteps(nSteps);
@@ -1010,15 +979,16 @@ void CStatVisualWnd::AnimateMove(int nDis, int nSteps, DWORD dwDelay)
 //----------------------------------------------------------------------------------------------------------------------
 void CStatVisualWnd::AnimateBar(Date_Key dk, int nVol, int nSteps, DWORD dwDelay)
 {
-	ASSERT(nVol >= 0 && nVol < 3);
+	if (!(nVol >= 0 && nVol < 3))
+		return;
 
 	CStepMan smSteps(nSteps);
 	smSteps.SetSpan_IncDec(100);
 	
+	abdAniBar.Reset();
 	abdAniBar.bEnable = true;
 	abdAniBar.dkDate = dk;
-	abdAniBar.nVolume = nVol;
-	abdAniBar.nPercent = 0;
+	abdAniBar.bVolumes[nVol] = true;
 	for (size_t i = 0; i < smSteps.Count(); i++)
 	{
 		if (smSteps[i] == 0)
@@ -1029,6 +999,33 @@ void CStatVisualWnd::AnimateBar(Date_Key dk, int nVol, int nSteps, DWORD dwDelay
 	}
 	abdAniBar.bEnable = false;
 	//DrawAll();
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+void CStatVisualWnd::AnimateBars(Date_Key dk, bool bVols[3], int nSteps, DWORD dwDelay)
+{
+	if (!(bVols[0] || bVols[1] || bVols[2]))
+		return;
+
+	CStepMan smSteps(nSteps);
+	smSteps.SetSpan_IncDec(100);
+
+	abdAniBar.Reset();
+	abdAniBar.bEnable = true;
+	abdAniBar.dkDate = dk;
+	abdAniBar.bVolumes[0] = bVols[0];
+	abdAniBar.bVolumes[1] = bVols[1];
+	abdAniBar.bVolumes[2] = bVols[2];
+	for (size_t i = 0; i < smSteps.Count(); i++)
+	{
+		if (smSteps[i] == 0)
+			break;
+		abdAniBar.nPercent += smSteps[i];
+		DrawAll();
+		::Sleep(dwDelay);
+	}
+	abdAniBar.bEnable = false;
 }
 
 

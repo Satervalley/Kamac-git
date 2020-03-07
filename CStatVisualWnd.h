@@ -24,16 +24,25 @@ public:
 	void Hide(void);
 	void BeginNaviPrevNext(bool bNext = false);
 	void BeginNaviFirstLast(bool bFirst = true);
-	void BeginNaviToDate(Date_Key dk, int nVol);
+	void BeginNaviToDate(Date_Key dk, int nVol = -1);
+	void BeginNaviToDate(Date_Key dk, bool bVols[3]);
 protected:
 	DECLARE_MESSAGE_MAP()
 
 	struct SAnimateBarData
 	{
 		bool bEnable{ false };
-		Date_Key dkDate;
-		int nVolume;
-		int nPercent;
+		Date_Key dkDate{ Date_Key_NULL };
+		bool bVolumes[3]{ false };
+		int nPercent{ 0 };
+
+		void Reset(void)
+		{
+			bEnable = false;
+			dkDate = Date_Key_NULL;
+			bVolumes[0] = bVolumes[1] = bVolumes[2] = false;
+			nPercent = 0;
+		}
 	};
 
 	static const int nBackgroundSize{ 32 };
@@ -90,12 +99,10 @@ protected:
 	int LegendClickEnd(const CPoint& pt);
 	void AnimateMove(int nDis, int nSteps = 12, DWORD dwDelay = 30);
 	void AnimateBar(Date_Key dk, int nVol, int nSteps = 12, DWORD dwDelay = 30);
+	void AnimateBars(Date_Key dk, bool bVols[3], int nSteps = 12, DWORD dwDelay = 30);
 	static D2D1::ColorF MakeHiColor2(COLORREF clr);
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnPaint();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnDraw2D(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
