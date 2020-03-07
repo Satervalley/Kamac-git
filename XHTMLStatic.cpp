@@ -1544,7 +1544,7 @@ void CXHTMLStatic::OnMouseMove(UINT nFlags, CPoint pointx)
 
 		for (int i = 0; i < n; i++)
 		{
-			CRect *pRect = (CRect *) m_AnchorRectPtrs[i];
+			CRect* pRect = (CRect*)m_AnchorRectPtrs[i];
 			CRect rect = *pRect;
 			ClientToScreen(&rect);
 

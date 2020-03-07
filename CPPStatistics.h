@@ -42,7 +42,7 @@ protected:
 		_T("the most activity is on <font color=\"#aa00ff\">%s</font>, <font color=\"#aa00ff\">%d</font> keyboard and mouse activities; ")
 		_T("the longest moving is on <font color=\"%s\">%s</font>, <font color=\"%s\">%dm</font>.<br>")
 	};
-	const TCHAR* htmlShowGraph = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>Show Graph</u></font></b></a>");
+	const TCHAR* htmlShowGraph = _T("<a href=\"app:CMD_VIEW_CHART\"><b><font color=\"blue\"><u>Show chart</u></font></b></a>");
 	const TCHAR* htmlNavigation = { 
 		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_OLDEST\"><font color=\"blue\"> ∣← </font></a>&nbsp;&nbsp;") 
 		_T("&nbsp;&nbsp;<a href=\"app:CMD_NAVI_PREV\"><font color=\"blue\"> ← </font></a>&nbsp;&nbsp;")

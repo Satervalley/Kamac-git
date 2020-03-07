@@ -990,7 +990,7 @@ void CStatVisualWnd::AnimateMove(int nDis, int nSteps, DWORD dwDelay)
 	CStepMan smSteps(nSteps);
 	if (nDis != 0)
 	{
-		smSteps.SetSpan_Inc(nDis);
+		smSteps.SetSpan_IncDec(nDis);
 		for (size_t i = 0; i < smSteps.Count(); i++)
 		{
 			if (smSteps[i] == 0)

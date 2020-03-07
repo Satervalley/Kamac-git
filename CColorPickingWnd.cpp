@@ -73,6 +73,7 @@ void CColorPickingWnd::OnMouseMove(UINT nFlags, CPoint point)
 		clrCurr = GetColor(pos.x, pos.y);
 		CDC* pDC = GetDC();
 		DrawPreview(pDC, clrCurr, false);
+		ReleaseDC(pDC);
 		ptCurrHover = pos;
 		if (!b)
 			pTarget->SendMessage(WM_USER_HOVER_COLOR);	// restore orig color

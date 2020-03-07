@@ -93,10 +93,6 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------------------------
 void CKamacSheet::OnRawInput(UINT nInputcode, HRAWINPUT hRawInput)
 {
-	// 该功能要求使用 Windows XP 或更高版本。
-	// 符号 _WIN32_WINNT 必须 >= 0x0501。
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	
 	static RAWINPUT ri;
 	UINT ui = sizeof(RAWINPUT);
 
@@ -136,7 +132,6 @@ void CKamacSheet::ProcessKeyboardInput(RAWKEYBOARD& rk)
     	if (!IsIconic())
 		{
 			ppMain->UpdateKeyboard(kmdSession.ulKeyStrokes, kmdToday.ulKeyStrokes, kmdTotal.ulKeyStrokes, rk.MakeCode);
-			//ppMain->UpdateInfo();
 		}
 	}
 }
@@ -185,8 +180,6 @@ void CKamacSheet::ProcessMouseInput(RAWMOUSE& rm)
 	if (!b)
 	{
 		ppMain->UpdateMouseDistance(kmdSession.ullDistance, kmdToday.ullDistance, kmdTotal.ullDistance);
-//		ppMain->UpdateMousePos(pt.x, pt.y);
-//		ppMain->UpdateInfo();
 		ppMain->statInfo.UpdateMousePoint(pt.x, pt.y);
 	}
 }
@@ -235,13 +228,6 @@ BOOL CKamacSheet::OnInitDialog()
 	CheckToday();
 	ppMain->UpdateAll(kmdSession, kmdToday, kmdTotal, usLastKey);
 
-	if (!koOptions.bMonitorSizeConfirmed)
-	{
-		koOptions.bMonitorSizeConfirmed = TRUE;
-		::AfxMessageBox(_T("You'd better input your monitor size before we start!"), MB_OK | MB_ICONINFORMATION);
-		SetActivePage(1);
-	}
-
 	HighColorTab::UpdateImageList(*this);
 
 	CPoint pt;
@@ -261,6 +247,13 @@ BOOL CKamacSheet::OnInitDialog()
 	rid[1].hwndTarget = *this;
 	::RegisterRawInputDevices(rid, 2, sizeof(rid[0]));
 
+	if (!koOptions.bMonitorSizeConfirmed)
+	{
+		koOptions.bMonitorSizeConfirmed = TRUE;
+		::AfxMessageBox(_T("You'd better input your monitor size before we start!"), MB_OK | MB_ICONINFORMATION);
+		SetActivePage(0);
+		SetActivePage(1);
+	}
 
 	uTimerID = SetTimer(uTimerID, 1000, nullptr);
 
@@ -491,24 +484,12 @@ void CKamacSheet::MakeTrayTipInfo(void)
 		//strDistTotal, strDistToday, strDistSession);
 }
 
-/*
-LPCTSTR CKamacSheet::MakeTrayTipInfo(void)
-{
-	static TCHAR tti[200];
-	tti[0] = 0;
-	_tcscat(tti, _T("Kamac V"));
-	_tcscat(tti, CUtil::itoa(AutoVersion::nMajor));
-	_tcscat(tti, _T("."));
-	_tcscat(tti, CUtil::itoa_02d(AutoVersion::nMinor));
-	_tcscat(tti, _T(" Build "));
-	return tti;
-}
-*/
 
 //----------------------------------------------------------------------------------------------------------------------
 HRESULT CKamacSheet::OnOptionsChanged(WPARAM wParam, LPARAM lParam)
 {
 	dmDisplay.Update(koOptions.ulMonitorSize);
+	ppMain->statInfo.UpdateScreenSize((koOptions.ulMonitorSize + 5) / 10);
 	return 0;
 }
 
@@ -601,24 +582,6 @@ void CKamacSheet::OnTrayExit()
 BOOL CKamacSheet::SaveDayDate(const SYSTEMTIME& st)
 {
 	BOOL bRes = false;
-	//UnqliteDatabase db;
-	//if (db.open(strHistoryFileName))
-	//{
-	//	std::string strEngineName;
-	//	db.getEngineName(strEngineName);
-
-	//	UnqliteQuery query(db);
-	//	std::string strKey;
-	//	char buf[10];
-	//	unsigned char data[sizeof(CKMData) * 2];
-	//	int pos = 0;
-	//	::snprintf(buf, 10, "%04d%02d%02d", st.wYear, st.wMonth, st.wDay);
-	//	strKey = buf;
-	//	pos = kmdToday.PutToBuffer(data, pos);
-	//	kmdTotal.PutToBuffer(data, pos);
-	//	bRes = query.storeData(strKey, data, sizeof(CKMData) * 2);
-	//	db.close();
-	//}
 	CKamacDS_Storage dss;
 	if (dss.Open(strHistoryFileName))
 	{

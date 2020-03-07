@@ -36,8 +36,6 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------------------------
 BOOL CNFStatic::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
-
 //	return CStatic::OnEraseBkgnd(pDC);
 	return TRUE;
 }

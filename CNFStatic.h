@@ -27,28 +27,20 @@ protected:
 	CBitmap bmp;
 	CFont font;
 
-	void DrawAndPut(int which, CDC * pTarget = nullptr)
+	void DrawAndPut(int which, CDC * pTarget = nullptr, bool bRelease = true)
 	{
 		dcMem.FillSolidRect(rcConts[which], ::GetSysColor(COLOR_INFOBK));
 		dcMem.DrawText(contents[which], _tcslen(contents[which]), &rcConts[which], DT_LEFT | DT_EXPANDTABS);
-		if (pTarget)
+		if (IsWindowVisible() && pTarget)
 		{
 			pTarget->BitBlt(rcConts[which].left, rcConts[which].top, rcConts[which].Width(), rcConts[which].Height(), &dcMem,
 				rcConts[which].left, rcConts[which].top, SRCCOPY);
 		}
+		if (pTarget && bRelease)
+			ReleaseDC(pTarget);
 	}
 
 public:
-	//----------------------------------------------------------------------------------------------------------------------
-	//void SetContent(const CString& str, BOOL refresh = TRUE)
-	//{
-	//	strContent = str;
-	//	if (refresh)
-	//	{
-	//		Invalidate(FALSE);
-	//		UpdateWindow();
-	//	}
-	//}
 
 	void UpdateScreenSize(int sz, BOOL refresh = TRUE)
 	{
@@ -57,8 +49,8 @@ public:
 		p[2] = 0;
 		if (refresh)
 		{
-			ASSERT(dcMem);
-			DrawAndPut(0, GetDC());
+			if(dcMem)
+				DrawAndPut(0, GetDC());
 		}
 	}
 
@@ -79,10 +71,28 @@ public:
 	void UpdateLastKey(unsigned char key, BOOL refresh = TRUE)
 	{
 		LPTSTR p = contents[2];
-		p[0] = _T('0');
-		p[1] = _T('X');
-		p += 2;
-		CUtil::itoax(key, p);
+		LONG lParam = key;
+		lParam <<= 16;
+		int nPos = ::GetKeyNameText(lParam, p, 32);
+		p += nPos;
+		if (nPos)
+		{
+			p[0] = _T(' ');
+			p[1] = _T('(');
+			p[2] = _T('0');
+			p[3] = _T('x');
+			p += 4;
+			p = CUtil::itoax(key, p, false);
+			p[0] = _T(')');
+			p[1] = _T('\0');
+		}
+		else
+		{
+			p[0] = _T('0');
+			p[1] = _T('x');
+			p += 2;
+			CUtil::itoax(key, p);
+		}
 		if (refresh && dcMem)
 		{
 			ASSERT(dcMem);
@@ -99,8 +109,8 @@ public:
 		CUtil::itoa(y, p + 3);
 		if (refresh)
 		{
-			ASSERT(dcMem);
-			DrawAndPut(3, GetDC());
+			if(dcMem)
+				DrawAndPut(3, GetDC());
 		}
 	}
 	

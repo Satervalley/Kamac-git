@@ -88,8 +88,8 @@ protected:
 	void DrawAll(CRenderTarget* prt = nullptr);
 	int LegendClickBegin(const CPoint & pt);
 	int LegendClickEnd(const CPoint& pt);
-	void AnimateMove(int nDis, int nSteps = 10, DWORD dwDelay = 40);
-	void AnimateBar(Date_Key dk, int nVol, int nSteps = 10, DWORD dwDelay = 40);
+	void AnimateMove(int nDis, int nSteps = 12, DWORD dwDelay = 30);
+	void AnimateBar(Date_Key dk, int nVol, int nSteps = 12, DWORD dwDelay = 30);
 	static D2D1::ColorF MakeHiColor2(COLORREF clr);
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

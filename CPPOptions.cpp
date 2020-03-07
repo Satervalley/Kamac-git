@@ -51,7 +51,6 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------------------------
 void CPPOptions::OnClickedCheckStartWithOS()
 {
-	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
 	koOPtions.bStartWithOS = bStartWithOS;
 	koOPtions.UpdateStartWithOS(strExeFileName);
@@ -81,7 +80,6 @@ BOOL CPPOptions::OnSetActive()
 //----------------------------------------------------------------------------------------------------------------------
 void CPPOptions::OnKillFocusEditMonitorSize()
 {
-	// TODO: 在此添加控件通知处理程序代码
 	UpdateData();
 	koOPtions.ulMonitorSize = ulMonitorSize;
 	GetParent()->SendMessage(WM_OPTIONS_CHANGED);
